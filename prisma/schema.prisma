@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  CUSTOMER
+}
+
+enum VenueType {
+  BANQUET_HALL
+  ROOFTOP
+  FARMHOUSE
+  RESTAURANT
+  CLUB
+  CONFERENCE_ROOM
+  OUTDOOR
+  VILLA
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum EnquiryStatus {
+  NEW
+  REPLIED
+  CLOSED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  phone     String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  venues    Venue[]
+  bookings  Booking[]
+  enquiries Enquiry[]
+  reviews   Review[]
+}
+
+model Venue {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  description     String    @db.Text
+  type            VenueType
+  capacity        Int
+  pricePerHour    Float
+  minBookingHours Int       @default(2)
+  address         String
+  city            String
+  state           String
+  pincode         String
+  latitude        Float?
+  longitude       Float?
+  images          String[]
+  amenities       String[]
+  highlights      String[]
+  isApproved      Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  ownerId         String
+  owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+  enquiries       Enquiry[]
+  reviews         Review[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  venueId     String
+  customerId  String
+  eventDate   DateTime
+  hours       Int
+  guestCount  Int
+  eventType   String
+  totalAmount Float
+  status      BookingStatus @default(PENDING)
+  paymentId   String?
+  notes       String?
+  venue       Venue         @relation(fields: [venueId], references: [id])
+  customer    User          @relation(fields: [customerId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Enquiry {
+  id         String        @id @default(cuid())
+  venueId    String
+  customerId String
+  name       String
+  email      String
+  phone      String
+  message    String        @db.Text
+  eventType  String
+  eventDate  DateTime?
+  guestCount Int
+  status     EnquiryStatus @default(NEW)
+  venue      Venue         @relation(fields: [venueId], references: [id])
+  customer   User          @relation(fields: [customerId], references: [id])
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  venueId   String
+  userId    String
+  rating    Int
+  comment   String   @db.Text
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
