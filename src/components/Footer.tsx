@@ -1,41 +1,73 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";
 
+const venueTypes = [
+    "Banquet Halls", "Rooftop Venues", "Farmhouses",
+    "Restaurants", "Night Clubs", "Conference Rooms",
+    "Outdoor Spaces", "Villas",
+];
+
+const quickLinks = [
+    { label: "Explore Venues", href: "/venues" },
+    { label: "List Your Venue", href: "/register" },
+    { label: "About Us", href: "/about" },
+    { label: "Blog", href: "/blog" },
+    { label: "Contact", href: "/contact" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+];
+
+const socials = [
+    { emoji: "📸", label: "Instagram", href: "#" },
+    { emoji: "🐦", label: "Twitter", href: "#" },
+    { emoji: "👥", label: "Facebook", href: "#" },
+    { emoji: "▶️", label: "YouTube", href: "#" },
+];
+
 export default function Footer() {
     return (
-        <footer className="border-t border-white/10 mt-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <footer style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: "0" }}>
+            <div className="section-container" style={{ paddingTop: "64px", paddingBottom: "40px" }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-                    {/* Brand */}
+
+                    {/* ── Brand ─────────────────────────────────── */}
                     <div>
-                        <Link href="/" className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm">🎉</div>
-                            <span className="font-bold text-xl text-white">Book<span className="gradient-text">N</span>Party</span>
+                        <Link href="/" className="flex items-center gap-2 mb-5">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm leading-none">
+                                🎉
+                            </div>
+                            <span className="font-bold text-lg text-white tracking-tight">
+                                Book<span className="gradient-text">N</span>Party
+                            </span>
                         </Link>
-                        <p className="text-white/50 text-sm leading-relaxed mb-4">
-                            India's premier platform to discover and book extraordinary venues for every celebration — from intimate gatherings to grand corporate events.
+                        <p style={{ color: "rgba(255,255,255,0.44)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "20px" }}>
+                            India's premier platform to discover and book extraordinary venues for
+                            every celebration — from intimate gatherings to grand corporate events.
                         </p>
-                        <div className="flex gap-3">
-                            {[
-                                { emoji: "📸", label: "Instagram" },
-                                { emoji: "🐦", label: "Twitter" },
-                                { emoji: "👥", label: "Facebook" },
-                                { emoji: "▶️", label: "YouTube" },
-                            ].map(({ emoji, label }) => (
-                                <a key={label} href="#" aria-label={label} className="w-8 h-8 rounded-full glass-card flex items-center justify-center text-sm hover:scale-110 transition-transform">
+                        <div className="flex gap-2.5">
+                            {socials.map(({ emoji, label, href }) => (
+                                <a key={label} href={href} aria-label={label}
+                                    className="w-9 h-9 rounded-full glass-card flex items-center justify-center text-sm hover:scale-110 transition-transform"
+                                    style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
                                     {emoji}
                                 </a>
                             ))}
                         </div>
                     </div>
 
-                    {/* Venue Types */}
+                    {/* ── Venue Types ───────────────────────────── */}
                     <div>
-                        <h4 className="font-semibold text-white mb-4">Venue Types</h4>
-                        <ul className="space-y-2 text-sm text-white/50">
-                            {["Banquet Halls", "Rooftop Venues", "Farmhouses", "Restaurants", "Night Clubs", "Conference Rooms", "Outdoor Spaces", "Villas"].map((v) => (
+                        <h4 className="font-semibold text-white mb-5" style={{ fontSize: "0.95rem" }}>
+                            Venue Types
+                        </h4>
+                        <ul className="space-y-2.5">
+                            {venueTypes.map((v) => (
                                 <li key={v}>
-                                    <Link href={`/venues?type=${v.toUpperCase().replace(/ /g, "_")}`} className="hover:text-white transition-colors">
+                                    <Link
+                                        href={`/venues?type=${v.toUpperCase().replace(/ /g, "_")}`}
+                                        style={{ color: "rgba(255,255,255,0.44)", fontSize: "0.875rem", textDecoration: "none" }}
+                                        className="hover:text-white transition-colors"
+                                    >
                                         {v}
                                     </Link>
                                 </li>
@@ -43,54 +75,80 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Quick Links */}
+                    {/* ── Quick Links ───────────────────────────── */}
                     <div>
-                        <h4 className="font-semibold text-white mb-4">Quick Links</h4>
-                        <ul className="space-y-2 text-sm text-white/50">
-                            {[
-                                { label: "Explore Venues", href: "/venues" },
-                                { label: "List Your Venue", href: "/register" },
-                                { label: "About Us", href: "/about" },
-                                { label: "Blog", href: "/blog" },
-                                { label: "Contact", href: "/contact" },
-                                { label: "Privacy Policy", href: "/privacy" },
-                                { label: "Terms of Service", href: "/terms" },
-                            ].map(({ label, href }) => (
+                        <h4 className="font-semibold text-white mb-5" style={{ fontSize: "0.95rem" }}>
+                            Quick Links
+                        </h4>
+                        <ul className="space-y-2.5">
+                            {quickLinks.map(({ label, href }) => (
                                 <li key={label}>
-                                    <Link href={href} className="hover:text-white transition-colors">{label}</Link>
+                                    <Link
+                                        href={href}
+                                        style={{ color: "rgba(255,255,255,0.44)", fontSize: "0.875rem", textDecoration: "none" }}
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        {label}
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
-                    {/* Contact */}
+                    {/* ── Contact ───────────────────────────────── */}
                     <div>
-                        <h4 className="font-semibold text-white mb-4">Contact Us</h4>
-                        <ul className="space-y-3 text-sm text-white/50">
-                            <li className="flex gap-2">
-                                <MapPin size={15} className="text-purple-400 mt-0.5 flex-shrink-0" />
-                                <span>123 Party Street, Mumbai, Maharashtra 400001</span>
+                        <h4 className="font-semibold text-white mb-5" style={{ fontSize: "0.95rem" }}>
+                            Contact Us
+                        </h4>
+                        <ul className="space-y-3">
+                            <li className="flex gap-2.5">
+                                <MapPin size={15} style={{ color: "#a855f7", flexShrink: 0, marginTop: "2px" }} />
+                                <span style={{ color: "rgba(255,255,255,0.44)", fontSize: "0.85rem", lineHeight: 1.5 }}>
+                                    123 Party Street, Mumbai, Maharashtra 400001
+                                </span>
                             </li>
-                            <li className="flex gap-2">
-                                <Phone size={15} className="text-purple-400 flex-shrink-0" />
-                                <a href="tel:+919876543210" className="hover:text-white">+91 98765 43210</a>
+                            <li className="flex gap-2.5 items-center">
+                                <Phone size={15} style={{ color: "#a855f7", flexShrink: 0 }} />
+                                <a href="tel:+919876543210"
+                                    style={{ color: "rgba(255,255,255,0.44)", fontSize: "0.85rem", textDecoration: "none" }}
+                                    className="hover:text-white transition-colors">
+                                    +91 98765 43210
+                                </a>
                             </li>
-                            <li className="flex gap-2">
-                                <Mail size={15} className="text-purple-400 flex-shrink-0" />
-                                <a href="mailto:hello@booknparty.in" className="hover:text-white">hello@booknparty.in</a>
+                            <li className="flex gap-2.5 items-center">
+                                <Mail size={15} style={{ color: "#a855f7", flexShrink: 0 }} />
+                                <a href="mailto:hello@booknparty.in"
+                                    style={{ color: "rgba(255,255,255,0.44)", fontSize: "0.85rem", textDecoration: "none" }}
+                                    className="hover:text-white transition-colors">
+                                    hello@booknparty.in
+                                </a>
                             </li>
                         </ul>
-                        <div className="mt-6 glass-card rounded-xl p-4">
-                            <p className="text-white/70 text-xs font-medium mb-2">🎉 List Your Venue Free</p>
-                            <p className="text-white/40 text-xs mb-3">Join 500+ venues earning with BookNParty</p>
-                            <Link href="/register?role=OWNER" className="btn-primary text-xs w-full text-center block py-2 rounded-lg">
+
+                        {/* CTA mini card */}
+                        <div className="mt-6 glass-card rounded-xl p-4"
+                            style={{ border: "1px solid rgba(168,85,247,0.22)" }}>
+                            <p className="text-white font-semibold text-xs mb-1">🎉 List Your Venue Free</p>
+                            <p style={{ color: "rgba(255,255,255,0.38)", fontSize: "0.75rem", marginBottom: "12px" }}>
+                                Join 500+ venues earning with BookNParty
+                            </p>
+                            <Link href="/register?role=OWNER"
+                                className="btn-primary text-xs w-full py-2 rounded-lg"
+                                style={{ display: "flex", justifyContent: "center" }}>
                                 Get Started
                             </Link>
                         </div>
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-white/30 text-xs">
+                {/* Bottom bar */}
+                <div style={{
+                    borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: "40px", paddingTop: "24px",
+                    display: "flex", flexDirection: "column", gap: "8px",
+                    alignItems: "center", justifyContent: "space-between",
+                    color: "rgba(255,255,255,0.28)", fontSize: "0.78rem"
+                }}
+                    className="sm:flex-row">
                     <p>© {new Date().getFullYear()} BookNParty. All rights reserved.</p>
                     <p>Made with ❤️ in India</p>
                 </div>

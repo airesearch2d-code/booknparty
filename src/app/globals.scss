@@ -1,0 +1,398 @@
+// ═══════════════════════════════════════════════════════════════════════
+//  BookNParty — Global Styles
+//  Converted from globals.css to SCSS for better maintainability
+// ═══════════════════════════════════════════════════════════════════════
+
+// Google Fonts — plain CSS @import (passes through Sass untouched)
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+// Tailwind directive — Sass sees this as a CSS import; PostCSS handles it
+// sass-lint:disable-next-line
+@import "tailwindcss"; // stylelint-disable-line
+
+// ─── SCSS Variables ────────────────────────────────────────────────────
+$bg-primary: #09091a;
+$bg-secondary: #0f0a1e;
+$purple-400: #c084fc;
+$purple-500: #a855f7;
+$pink-400: #f472b6;
+$pink-500: #ec4899;
+$orange-500: #f97316;
+$glass-bg: rgba(255, 255, 255, 0.05);
+$glass-border: rgba(255, 255, 255, 0.10);
+$text-primary: #ffffff;
+$text-muted: rgba(255, 255, 255, 0.50);
+$text-faint: rgba(255, 255, 255, 0.30);
+
+// Purple tints
+$purple-glow-sm: rgba(168, 85, 247, 0.25);
+$purple-glow-md: rgba(168, 85, 247, 0.45);
+$purple-glow-lg: rgba(168, 85, 247, 0.75);
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-base: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+// Border radii
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$radius-xl: 20px;
+$radius-2xl: 24px;
+$radius-full: 9999px;
+
+// ─── SCSS Mixins ───────────────────────────────────────────────────────
+@mixin glass($blur: 12px) {
+    background: $glass-bg;
+    backdrop-filter: blur($blur);
+    -webkit-backdrop-filter: blur($blur);
+    border: 1px solid $glass-border;
+}
+
+@mixin gradient-purple-pink {
+    background: linear-gradient(135deg, $purple-500, $pink-500);
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin btn-base {
+    @include flex-center;
+    gap: 6px;
+    border-radius: $radius-md;
+    padding: 10px 24px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity $transition-base, transform $transition-fast, box-shadow $transition-base;
+}
+
+// ─── CSS Custom Properties (for runtime use) ───────────────────────────
+:root {
+    --bg-primary: #{$bg-primary};
+    --bg-secondary: #{$bg-secondary};
+    --purple-400: #{$purple-400};
+    --purple-500: #{$purple-500};
+    --pink-400: #{$pink-400};
+    --pink-500: #{$pink-500};
+    --glass-bg: #{$glass-bg};
+    --glass-border: #{$glass-border};
+    --text-primary: #{$text-primary};
+    --text-muted: #{$text-muted};
+    --text-faint: #{$text-faint};
+}
+
+// ─── Reset ─────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+// ─── Body ──────────────────────────────────────────────────────────────
+body {
+    background: linear-gradient(135deg, $bg-primary 0%, $bg-secondary 100%);
+    background-attachment: fixed;
+    color: $text-primary;
+    min-height: 100vh;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// ─── Scrollbar ─────────────────────────────────────────────────────────
+::-webkit-scrollbar {
+    width: 5px;
+
+    &-track {
+        background: $bg-primary;
+    }
+
+    &-thumb {
+        background: $purple-glow-md;
+        border-radius: 4px;
+
+        &:hover {
+            background: $purple-glow-lg;
+        }
+    }
+}
+
+// ─── Glass Card ────────────────────────────────────────────────────────
+.glass-card {
+    @include glass(12px);
+}
+
+// ─── Gradient Text ─────────────────────────────────────────────────────
+.gradient-text {
+    background: linear-gradient(135deg, $purple-500 0%, $pink-500 50%, $orange-500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+// ─── Neon Glow ─────────────────────────────────────────────────────────
+.neon-glow {
+    box-shadow:
+        0 0 20px $purple-glow-sm,
+        0 0 60px rgba(168, 85, 247, 0.10);
+}
+
+// ─── Venue Card ────────────────────────────────────────────────────────
+.venue-card {
+    transition: transform $transition-slow, box-shadow $transition-slow;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 24px 48px rgba(168, 85, 247, 0.20);
+    }
+}
+
+// ─── Input Field ───────────────────────────────────────────────────────
+.input-field {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: $radius-md;
+    color: white;
+    padding: 11px 14px;
+    width: 100%;
+    outline: none;
+    font-size: 0.875rem;
+    transition: border-color $transition-base, box-shadow $transition-base;
+
+    &:focus {
+        border-color: $purple-500;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+    }
+
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    option {
+        background: #1a1030;
+        color: white;
+    }
+}
+
+// ─── Buttons ───────────────────────────────────────────────────────────
+.btn-primary {
+    @include btn-base;
+    @include gradient-purple-pink;
+    color: white;
+    border: none;
+    display: inline-flex;
+
+    &:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+.btn-secondary {
+    @include btn-base;
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.13);
+        border-color: rgba(255, 255, 255, 0.28);
+        transform: translateY(-1px);
+    }
+}
+
+// ─── Badge ─────────────────────────────────────────────────────────────
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: $radius-full;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+// ─── Section Title ─────────────────────────────────────────────────────
+.section-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+// ─── Container Helper ──────────────────────────────────────────────────
+.section-container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    width: 100%;
+}
+
+// ─── Navbar ────────────────────────────────────────────────────────────
+.navbar-bg {
+    background: rgba(9, 9, 26, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+// ─── Category Card ─────────────────────────────────────────────────────
+.category-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+    &:hover {
+        transform: translateY(-4px) scale(1.03);
+        border-color: rgba(168, 85, 247, 0.40);
+        box-shadow: 0 12px 28px rgba(168, 85, 247, 0.15);
+    }
+}
+
+// ─── Step Connector ────────────────────────────────────────────────────
+.step-connector {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    width: 100%;
+    height: 1px;
+    border-top: 2px dashed rgba(168, 85, 247, 0.25);
+    pointer-events: none;
+}
+
+// ─── Animations ────────────────────────────────────────────────────────
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-14px);
+    }
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.30);
+    }
+
+    50% {
+        box-shadow: 0 0 45px rgba(168, 85, 247, 0.60);
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+.animate-float {
+    animation: float 5s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+    animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.6s ease both;
+}
+
+// ─── Swiper ────────────────────────────────────────────────────────────
+.swiper-pagination-bullet {
+    background: rgba(168, 85, 247, 0.45) !important;
+
+    &-active {
+        background: $purple-500 !important;
+    }
+}
+
+// ─── Focus Ring ────────────────────────────────────────────────────────
+:focus-visible {
+    outline: 2px solid $purple-500;
+    outline-offset: 2px;
+}
+
+// ─── Utility: Line Clamp ───────────────────────────────────────────────
+@mixin line-clamp($lines) {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    line-clamp: $lines;
+    -webkit-box-orient: vertical;
+}
+
+.line-clamp-1 {
+    @include line-clamp(1);
+}
+
+.line-clamp-2 {
+    @include line-clamp(2);
+}
+
+.line-clamp-3 {
+    @include line-clamp(3);
+}
+
+// ─── Dashboard Sidebar ─────────────────────────────────────────────────
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: $radius-md;
+    color: rgba(255, 255, 255, 0.60);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background $transition-base, color $transition-base;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.07);
+        color: white;
+    }
+
+    &.active {
+        background: rgba(168, 85, 247, 0.18);
+        color: white;
+    }
+}
