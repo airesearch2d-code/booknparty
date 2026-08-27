@@ -35,8 +35,8 @@ enum BookingStatus {
 }
 
 enum EnquiryStatus {
-  NEW
-  REPLIED
+  PENDING
+  RESPONDED
   CLOSED
 }
 
@@ -90,10 +90,11 @@ model Booking {
   id          String        @id @default(cuid())
   venueId     String
   customerId  String
-  eventDate   DateTime
-  hours       Int
+  date        DateTime
+  startTime   String
+  endTime     String
+  totalHours  Int
   guestCount  Int
-  eventType   String
   totalAmount Float
   status      BookingStatus @default(PENDING)
   paymentId   String?
@@ -112,10 +113,11 @@ model Enquiry {
   email      String
   phone      String
   message    String        @db.Text
-  eventType  String
+  eventType  String?
   eventDate  DateTime?
-  guestCount Int
-  status     EnquiryStatus @default(NEW)
+  guestCount Int?
+  response   String?       @db.Text
+  status     EnquiryStatus @default(PENDING)
   venue      Venue         @relation(fields: [venueId], references: [id])
   customer   User          @relation(fields: [customerId], references: [id])
   createdAt  DateTime      @default(now())
