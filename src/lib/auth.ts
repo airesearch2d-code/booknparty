@@ -1,11 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { authConfig } from "../auth.config";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    session: { strategy: "jwt" },
+    ...authConfig, // Spread edge-safe base config (session strategy, pages)
     providers: [
         Credentials({
             name: "credentials",
@@ -53,9 +54,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return session;
         },
-    },
-    pages: {
-        signIn: "/login",
-        error: "/login",
     },
 });

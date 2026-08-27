@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Phone, Mail, Instagram, Twitter, Facebook, Youtube } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
     return (
@@ -16,9 +16,14 @@ export default function Footer() {
                             India's premier platform to discover and book extraordinary venues for every celebration — from intimate gatherings to grand corporate events.
                         </p>
                         <div className="flex gap-3">
-                            {[Instagram, Twitter, Facebook, Youtube].map((Icon, i) => (
-                                <a key={i} href="#" className="w-8 h-8 rounded-full glass-card flex items-center justify-center text-white/60 hover:text-purple-400 transition-colors">
-                                    <Icon size={15} />
+                            {[
+                                { emoji: "📸", label: "Instagram" },
+                                { emoji: "🐦", label: "Twitter" },
+                                { emoji: "👥", label: "Facebook" },
+                                { emoji: "▶️", label: "YouTube" },
+                            ].map(({ emoji, label }) => (
+                                <a key={label} href="#" aria-label={label} className="w-8 h-8 rounded-full glass-card flex items-center justify-center text-sm hover:scale-110 transition-transform">
+                                    {emoji}
                                 </a>
                             ))}
                         </div>
