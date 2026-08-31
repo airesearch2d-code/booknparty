@@ -10,7 +10,7 @@ export default async function CustomerDashboard() {
     const session = await auth();
     if (!session || (session.user as any).role !== "CUSTOMER") redirect("/login");
 
-    const userId = session.user.id!;
+    const userId = session.user!.id!;
 
     const [bookings, enquiries] = await Promise.all([
         prisma.booking.findMany({
@@ -44,7 +44,7 @@ export default async function CustomerDashboard() {
         <DashboardLayout role="CUSTOMER">
             <div className="max-w-6xl">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-white">Welcome back, {session.user.name?.split(" ")[0]}! 👋</h1>
+                    <h1 className="text-3xl font-bold text-white">Welcome back, {session.user!.name?.split(" ")[0]}! 👋</h1>
                     <p className="text-white/50 mt-1">Here's an overview of your activity</p>
                 </div>
 

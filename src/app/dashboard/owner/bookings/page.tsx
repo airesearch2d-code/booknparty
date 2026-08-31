@@ -79,8 +79,8 @@ export default async function OwnerBookingsPage() {
                                             </div>
                                             {/* Booking details */}
                                             <div className="flex flex-wrap gap-4 text-xs text-white/40">
-                                                <span className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(booking.date)}</span>
-                                                <span className="flex items-center gap-1.5"><Clock size={12} /> {booking.startTime} – {booking.endTime}</span>
+                                                <span className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(booking.eventDate)}</span>
+                                                <span className="flex items-center gap-1.5"><Clock size={12} /> {booking.hours} hrs</span>
                                                 <span className="flex items-center gap-1.5"><Users size={12} /> {booking.guestCount} guests</span>
                                                 <span className="flex items-center gap-1.5 text-white font-semibold">{formatCurrency(booking.totalAmount)}</span>
                                             </div>

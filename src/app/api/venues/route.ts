@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         data: {
             ...body,
             slug,
-            ownerId: session.user.id!,
+            ownerId: session.user!.id!,
             images: body.images || [],
             amenities: body.amenities || [],
             highlights: body.highlights || [],

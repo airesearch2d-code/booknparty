@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { MapPin, Calendar, Clock, Star, MessageSquare } from "lucide-react";
+import { MapPin, Calendar, Clock, Star } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
+import ReviewModal from "@/components/ReviewModal";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
     PENDING: { label: "Pending", color: "bg-yellow-500/20 text-yellow-300" },
@@ -17,13 +18,21 @@ export default async function CustomerBookingsPage() {
     const session = await auth();
     if (!session || (session.user as any).role !== "CUSTOMER") redirect("/login");
 
-    const bookings = await prisma.booking.findMany({
-        where: { customerId: session.user.id! },
-        include: {
-            venue: { select: { name: true, images: true, city: true, state: true, slug: true } },
-        },
-        orderBy: { createdAt: "desc" },
-    });
+    const [bookings, reviews] = await Promise.all([
+        prisma.booking.findMany({
+            where: { customerId: session.user.id! },
+            include: {
+                venue: { select: { name: true, images: true, city: true, state: true, slug: true } },
+            },
+            orderBy: { createdAt: "desc" },
+        }),
+        prisma.review.findMany({
+            where: { userId: session.user.id! },
+            select: { venueId: true },
+        }),
+    ]);
+
+    const reviewedVenueIds = new Set(reviews.map(r => r.venueId));
 
     return (
         <DashboardLayout role="CUSTOMER">
@@ -44,6 +53,7 @@ export default async function CustomerBookingsPage() {
                     <div className="space-y-4">
                         {bookings.map((booking) => {
                             const st = statusConfig[booking.status] ?? statusConfig.PENDING;
+                            const alreadyReviewed = reviewedVenueIds.has(booking.venueId);
                             return (
                                 <div key={booking.id} className="glass-card rounded-2xl p-5">
                                     <div className="flex gap-4">
@@ -65,17 +75,23 @@ export default async function CustomerBookingsPage() {
                                                 <MapPin size={13} /> {booking.venue.city}, {booking.venue.state}
                                             </div>
                                             <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-white/50">
-                                                <span className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(booking.date)}</span>
-                                                <span className="flex items-center gap-1.5"><Clock size={12} /> {booking.startTime} – {booking.endTime}</span>
+                                                <span className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(booking.eventDate)}</span>
+                                                <span className="flex items-center gap-1.5"><Clock size={12} /> {booking.hours} hrs</span>
+                                                {booking.eventType && <span>🎉 {booking.eventType}</span>}
                                                 <span className="font-semibold text-white">{formatCurrency(booking.totalAmount)}</span>
                                             </div>
                                         </div>
                                     </div>
+
                                     {booking.status === "COMPLETED" && (
                                         <div className="mt-4 pt-4 border-t border-white/10">
-                                            <Link href={`/venues/${booking.venue.slug}#reviews`} className="btn-secondary text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 w-fit">
-                                                <Star size={12} /> Leave a Review
-                                            </Link>
+                                            {alreadyReviewed ? (
+                                                <span className="text-xs text-green-400 flex items-center gap-1.5">
+                                                    <Star size={12} className="fill-green-400" /> Review submitted ✓
+                                                </span>
+                                            ) : (
+                                                <ReviewModal venueId={booking.venueId} venueName={booking.venue.name} />
+                                            )}
                                         </div>
                                     )}
                                 </div>
