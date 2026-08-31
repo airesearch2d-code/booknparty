@@ -9,7 +9,9 @@ import Link from "next/link";
 export default async function OwnerVenuesPage() {
     const session = await auth();
     if (!session || (session.user as any).role !== "OWNER") redirect("/login");
-
+    if (!session.user) {
+        return redirect("/login");
+    }
     const venues = await prisma.venue.findMany({
         where: { ownerId: session.user.id! },
         include: {

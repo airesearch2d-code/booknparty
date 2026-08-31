@@ -2,100 +2,33 @@
 
 ## Overview
 
-Phase 4 focuses on completing the BookNParty platform with payment integration, notifications, and enhanced user experience features. This phase transforms the platform from "production-ready (minus payments)" to "fully production-ready with all critical features."
+Phase 4 focuses on enhancing the BookNParty platform with notifications, profile management, and improved user experience features. This phase improves platform usability and communication while maintaining the manual booking confirmation workflow.
+
+**Note**: Payment integration has been deferred to Phase 5 (requires Razorpay account setup).
 
 **Target Start**: After Phase 3 verification  
-**Estimated Duration**: 3-4 weeks  
-**Priority**: High (required for real transactions)
+**Estimated Duration**: 2-3 weeks  
+**Priority**: High (improves platform usability)
 
 ---
 
 ## Phase 4 Goals
 
-1. **Enable Real Transactions**: Integrate payment gateway for actual bookings
-2. **Improve Communication**: Add email/SMS notifications
-3. **Enhance UX**: Add profile management, calendar view, advanced features
-4. **Optimize Performance**: Improve loading times and responsiveness
-5. **Prepare for Scale**: Add monitoring, error tracking, analytics
+1. **Improve Communication**: Add email notifications for key events
+2. **Enhance UX**: Add profile management and user preferences
+3. **Prevent Conflicts**: Implement calendar-based availability system
+4. **Admin Tools**: Complete admin dashboard functionality
+5. **Essential Features**: Password recovery, invoice generation
 
 ---
 
-## 🔴 Priority 1: Payment Integration (CRITICAL)
-
-### Feature: Razorpay Payment Gateway
-
-**Status**: Not Started  
-**Estimated Effort**: 2-3 hours  
-**Priority**: P0 (Highest)
-
-**Description:**  
-Integrate Razorpay for secure online payments. Booking flow changes from direct submission to payment-first workflow.
-
-**Requirements:**
-
-1. **Setup**:
-   - Create Razorpay account (test mode free)
-   - Add credentials to `.env.local`
-   - Install SDK: `npm install razorpay`
-
-2. **Backend Changes**:
-   - Create `/api/payments/create-order` (POST)
-     - Input: `{ amount, currency }`
-     - Output: `{ orderId, amount, currency }`
-   - Create `/api/payments/verify` (POST)
-     - Input: `{ orderId, paymentId, signature }`
-     - Verify signature with HMAC
-     - Update booking status to CONFIRMED
-     - Store `paymentId` in database
-
-3. **Frontend Changes**:
-   - Modify [`src/app/venues/[slug]/book/page.tsx`](../src/app/venues/[slug]/book/page.tsx)
-   - Load Razorpay script via `<Script>` tag
-   - On form submit:
-     1. Call `/api/payments/create-order`
-     2. Open Razorpay checkout popup
-     3. On success, call `/api/payments/verify`
-     4. Redirect to dashboard with success message
-
-4. **Testing**:
-   - Test mode card: `4111 1111 1111 1111`
-   - Verify booking status changes to CONFIRMED
-   - Verify `paymentId` stored correctly
-
-**Files to Create:**
-
-- `src/app/api/payments/create-order/route.ts`
-- `src/app/api/payments/verify/route.ts`
-
-**Files to Modify:**
-
-- `src/app/venues/[slug]/book/page.tsx`
-
-**Environment Variables:**
-
-```env
-RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-```
-
-**Acceptance Criteria:**
-
-- ✅ Customer can pay for booking via Razorpay
-- ✅ Payment success triggers CONFIRMED status
-- ✅ Payment failure shows error message
-- ✅ Booking records payment ID
-- ✅ Test mode works with test card
-
----
-
-## 🟠 Priority 2: Notifications System
+## 🔴 Priority 1: Notifications System
 
 ### Feature: Email Notifications
 
 **Status**: Not Started  
 **Estimated Effort**: 4-5 hours  
-**Priority**: P1 (High)
+**Priority**: P0 (Highest)
 
 **Description:**  
 Send automated emails for key events (booking confirmations, enquiry responses, venue approvals).
@@ -175,13 +108,13 @@ EMAIL_FROM_NAME=BookNParty
 
 ---
 
-## 🟡 Priority 3: Profile Management
+## � Priority 2: Profile Management
 
 ### Feature: User Profile Pages
 
 **Status**: Not Started  
 **Estimated Effort**: 3-4 hours  
-**Priority**: P2 (Medium)
+**Priority**: P1 (High)
 
 **Description:**  
 Allow users to manage their profiles, change passwords, update contact information, and upload avatars.
@@ -454,26 +387,21 @@ model PasswordResetToken {
 
 ## Phase 4 Sprint Plan
 
-### Sprint 1 (Week 1): Payment & Notifications
+### Sprint 1 (Week 1): Notifications & Profile
 
-- **Days 1-2**: Razorpay integration
-- **Days 3-5**: Email notification system
+- **Days 1-3**: Email notification system
+- **Days 4-5**: Profile management pages
 
-### Sprint 2 (Week 2): Profile & Calendar
+### Sprint 2 (Week 2): Calendar & Admin
 
-- **Days 1-2**: Profile management
-- **Days 3-5**: Calendar availability
+- **Days 1-3**: Calendar availability feature
+- **Days 4-5**: Admin dashboard enhancements
 
-### Sprint 3 (Week 3): Admin & Features
+### Sprint 3 (Week 3): Additional Features & Polish
 
-- **Days 1-2**: Admin dashboard pages
-- **Days 3-5**: Password recovery, invoice generation
-
-### Sprint 4 (Week 4): Polish & Testing
-
-- **Days 1-2**: Bug fixes, refinements
-- **Days 3-4**: Testing and verification
-- **Day 5**: Documentation and handoff
+- **Days 1-2**: Password recovery
+- **Days 3-4**: Invoice generation (optional)
+- **Day 5**: Testing, bug fixes, documentation
 
 ---
 
@@ -481,15 +409,17 @@ model PasswordResetToken {
 
 Phase 4 is complete when:
 
-- ✅ Payment integration works end-to-end
 - ✅ Email notifications sent for key events
 - ✅ Profile management functional
 - ✅ Calendar shows availability
+- ✅ Password recovery works
 - ✅ Admin dashboard complete
 - ✅ All critical bugs fixed
 - ✅ Documentation updated
 - ✅ Build passes without errors
 - ✅ Manual testing checklist passed
+
+**Note**: Payment integration deferred to Phase 5 (requires Razorpay account)
 
 ---
 
@@ -497,17 +427,22 @@ Phase 4 is complete when:
 
 **External Services:**
 
-- Razorpay account (free test mode)
-- Email service account (Resend/SendGrid)
-- Cloudinary (already configured)
+- Email service account (Resend/SendGrid) - Required
+- Cloudinary (already configured) - Ready
 
 **Technical:**
 
-- No database migrations required (except calendar feature)
+- Database migration needed for calendar feature (VenueBlockedDate model)
 - Compatible with current Next.js/Prisma versions
+
+**Deferred to Phase 5:**
+
+- Razorpay account (payment integration)
+- Payment processing infrastructure
 
 ---
 
-**Last Updated**: August 2026  
+**Last Updated**: August 31, 2026  
 **Status**: Planning Phase  
-**Start Date**: After Phase 3 verification
+**Start Date**: After Phase 3 verification complete  
+**Payment Integration**: Deferred to Phase 5

@@ -16,7 +16,9 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 export default async function OwnerBookingsPage() {
     const session = await auth();
     if (!session || (session.user as any).role !== "OWNER") redirect("/login");
-
+    if (!session.user) {
+        return redirect("/login");
+    }
     const bookings = await prisma.booking.findMany({
         where: { venue: { ownerId: session.user.id! } },
         include: {

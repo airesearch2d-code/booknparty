@@ -19,7 +19,7 @@ function getLast6Months() {
 
 export default async function OwnerDashboard() {
     const session = await auth();
-    if (!session || (session.user as any).role !== "OWNER") redirect("/login");
+    if (!session || !session.user || (session.user as any).role !== "OWNER") redirect("/login");
 
     const userId = session.user.id!;
 
