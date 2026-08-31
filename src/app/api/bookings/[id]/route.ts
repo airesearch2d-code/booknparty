@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { sendBookingStatusUpdateToCustomer } from "@/lib/email";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -35,7 +36,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const updated = await prisma.booking.update({
         where: { id },
         data: { status },
+        include: { customer: { select: { name: true, email: true } }, venue: { select: { name: true } } },
     });
+
+    // Notify customer of status change
+    sendBookingStatusUpdateToCustomer({
+        customerEmail: updated.customer.email,
+        customerName: updated.customer.name,
+        venueName: updated.venue.name,
+        eventDate: updated.eventDate,
+        totalAmount: updated.totalAmount,
+        newStatus: updated.status as "CONFIRMED" | "CANCELLED" | "COMPLETED",
+    }).catch(console.error);
 
     return NextResponse.json({ booking: updated });
 }

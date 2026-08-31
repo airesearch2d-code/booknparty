@@ -97,6 +97,15 @@
 - **Use Cases**: Global styles, CSS variables, nested selectors
 - **Integration**: Next.js built-in SCSS support
 
+## Communication & Email
+
+### Resend
+
+- **Why**: Provider for transactional emails triggered by booking, enquiry, venue approval, and welcome events
+- **Use Cases**: Automated email notifications for customers and owners
+- **Environment**: `RESEND_API_KEY` and `EMAIL_FROM`
+- **Documentation**: https://resend.com/docs
+
 ## Form Handling
 
 ### React Hook Form 7.86.0

@@ -86,32 +86,23 @@ Create a seamless experience for discovering, booking, and managing event venues
 
 **Status**: Technical implementation 100% complete. Browser testing optional.
 
-### 🔄 Phase 4: UX & Communication (Planned - 2-3 weeks)
+### 🔄 Phase 4: UX & Communication (In Progress)
 
-**Priority 1**: Notifications System
+**Implementation status (August 31, 2026):**
 
-- Email notifications for bookings, enquiries, venue approvals
-- Automated confirmation emails with booking details
+**Completed in the current codebase:**
 
-**Priority 2**: Profile Management
+- ✅ Email notifications for bookings, enquiries, venue approvals, and welcome messages via Resend
+- ✅ Role-based profile management pages for customer, owner, and admin accounts
+- ✅ Password change workflow and profile editing
+- ✅ Admin settings dashboard with moderation toggles
 
-- User profile pages with avatar upload
-- Password change functionality
-- Account settings
+**Still pending:**
 
-**Priority 3**: Calendar & Availability
-
-- Monthly calendar view for venue availability
-- Date blocking for venue owners
-- Conflict detection to prevent double-bookings
-
-**Priority 4**: Admin Enhancements
-
-- Advanced filtering and bulk actions
-- Export functionality (CSV)
-- Platform statistics dashboard
-
-**Status**: Waiting for Phase 3 completion
+- ⏳ Venue availability calendar and blocking logic
+- ⏳ Advanced conflict detection and double-booking checks
+- ⏳ Additional admin reporting/export features
+- ⏳ Final QA and polish pass
 
 ### 🔜 Phase 5: Payment & Scale (Planned - 2-3 weeks)
 

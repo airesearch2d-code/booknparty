@@ -38,6 +38,10 @@ DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/booknparty"
 AUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
 
+# Email notifications (Resend)
+RESEND_API_KEY="your-resend-api-key"
+EMAIL_FROM="BookNParty <noreply@booknparty.com>"
+
 # Cloudinary (optional for image uploads)
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
 CLOUDINARY_API_KEY="your-api-key"

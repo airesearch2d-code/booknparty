@@ -2,9 +2,10 @@
 
 ## Overview
 
-Phase 5 focuses on enabling **real online transactions** through payment gateway integration and preparing the platform for scale with performance optimizations, monitoring, and advanced features. This phase transforms BookNParty into a fully production-ready commercial platform.
+Phase 5 remains the production-scale and payment phase. It is intentionally deferred until the remaining Phase 4 items—calendar availability, admin polish, and final QA—are closed out.
 
-**Target Start**: After Phase 4 completion  
+**Current Status**: Not started  
+**Target Start**: After Phase 4 completion and final build verification  
 **Estimated Duration**: 2-3 weeks  
 **Priority**: Critical (required for real transactions)
 

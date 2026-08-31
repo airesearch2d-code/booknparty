@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { sendVenueApprovedToOwner, sendVenueRejectedToOwner } from "@/lib/email";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -62,6 +63,30 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             isApproved: role === "ADMIN" ? existing.isApproved : false,
         },
     });
+
+    // If admin is approving or rejecting, send notification to owner
+    if (role === "ADMIN" && body.isApproved !== undefined) {
+        const owner = await prisma.user.findUnique({
+            where: { id: existing.ownerId },
+            select: { name: true, email: true },
+        });
+        if (owner) {
+            if (body.isApproved === true && !existing.isApproved) {
+                sendVenueApprovedToOwner({
+                    ownerEmail: owner.email,
+                    ownerName: owner.name,
+                    venueName: updated.name,
+                    venueSlug: updated.slug,
+                }).catch(console.error);
+            } else if (body.isApproved === false && existing.isApproved) {
+                sendVenueRejectedToOwner({
+                    ownerEmail: owner.email,
+                    ownerName: owner.name,
+                    venueName: updated.name,
+                }).catch(console.error);
+            }
+        }
+    }
 
     return NextResponse.json({ venue: updated });
 }
