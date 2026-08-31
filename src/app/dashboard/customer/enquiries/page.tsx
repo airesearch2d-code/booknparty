@@ -15,7 +15,9 @@ const enquiryStatus: Record<string, { label: string; color: string }> = {
 export default async function CustomerEnquiriesPage() {
     const session = await auth();
     if (!session || (session.user as any).role !== "CUSTOMER") redirect("/login");
-
+    if (!session.user) {
+        return redirect("/login");
+    }
     const enquiries = await prisma.enquiry.findMany({
         where: { customerId: session.user.id! },
         include: {

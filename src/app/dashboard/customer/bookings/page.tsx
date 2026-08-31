@@ -16,7 +16,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default async function CustomerBookingsPage() {
     const session = await auth();
-    if (!session || (session.user as any).role !== "CUSTOMER") redirect("/login");
+    if (!session || !session.user || (session.user as any).role !== "CUSTOMER") redirect("/login");
 
     const [bookings, reviews] = await Promise.all([
         prisma.booking.findMany({

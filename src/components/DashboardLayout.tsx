@@ -65,10 +65,10 @@ export async function DashboardLayout({ children, role }: DashboardLayoutProps) 
                 <div className="p-4 border-b border-white/10">
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${roleColors[userRole]} flex items-center justify-center font-bold text-white`}>
-                            {session.user.name?.[0]?.toUpperCase()}
+                            {session.user?.name?.[0]?.toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-white text-sm font-semibold truncate">{session.user.name}</p>
+                            <p className="text-white text-sm font-semibold truncate">{session.user?.name}</p>
                             <span className={`text-xs badge bg-gradient-to-r ${roleColors[userRole]} text-white`}>
                                 {roleEmoji[userRole]} {roleLabels[userRole]}
                             </span>

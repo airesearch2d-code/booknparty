@@ -15,7 +15,9 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 export default async function OwnerEnquiriesPage() {
     const session = await auth();
     if (!session || (session.user as any).role !== "OWNER") redirect("/login");
-
+    if (!session.user) {
+        return redirect("/login");
+    }
     const enquiries = await prisma.enquiry.findMany({
         where: { venue: { ownerId: session.user.id! } },
         include: {
