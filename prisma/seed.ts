@@ -33,7 +33,7 @@ async function main() {
         where: { email: "admin@booknparty.in" },
         update: {},
         create: {
-            name: "Arjun Sharma",
+            name: "Santosh Gupta",
             email: "admin@booknparty.in",
             password,
             role: "ADMIN",

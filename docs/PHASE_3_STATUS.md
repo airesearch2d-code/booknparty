@@ -12,7 +12,7 @@ Phase 3 was designed to transform BookNParty from foundation into a **production
 
 **Original Features**: 7 areas  
 **Completed**: 6 areas (85%)  
-**Deferred**: 1 area (Payment Integration → Phase 4)
+**Deferred**: 1 area (Payment Integration → Phase 5)
 
 ---
 
@@ -318,7 +318,7 @@ await prisma.booking.update({
 
 **🔴 PENDING (1):**
 
-- Payment integration (moved to Phase 4)
+- Payment integration (moved to Phase 5)
 
 ---
 
