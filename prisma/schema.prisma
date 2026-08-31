@@ -90,10 +90,9 @@ model Booking {
   id          String        @id @default(cuid())
   venueId     String
   customerId  String
-  date        DateTime
-  startTime   String
-  endTime     String
-  totalHours  Int
+  eventDate   DateTime
+  hours       Int
+  eventType   String?
   guestCount  Int
   totalAmount Float
   status      BookingStatus @default(PENDING)

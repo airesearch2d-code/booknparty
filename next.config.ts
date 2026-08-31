@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["pg", "@prisma/adapter-pg"],
   sassOptions: {
     // Silence the Dart Sass @import deprecation warning that fires on
     // @import "tailwindcss" — this directive is handled by PostCSS, not Sass.
