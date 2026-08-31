@@ -29,9 +29,9 @@ Welcome to the comprehensive documentation for **BookNParty** - a modern venue b
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your database credentials
+# Create local environment variables
+copy NUL .env.local
+# Edit .env.local with DATABASE_URL, AUTH_SECRET, RESEND_API_KEY, etc.
 
 # Sync database schema
 npx prisma db push
@@ -69,38 +69,41 @@ All major AI agents (GitHub Copilot, Cursor, Claude, Windsurf, etc.) can read th
 
 ## 🏗️ Project Status
 
-**Current Phase**: Phase 4 (Planning/Execution)
+**Current Phase**: Phase 4 (In Progress)
 
-**Phase 3**: Feature delivery complete (6/7), payment intentionally deferred to Phase 5
+**Latest development status (August 31, 2026):**
 
-**Verified in Build**:
-
-- ✅ Production build successful
-- ✅ TypeScript check passed (0 errors)
-- ✅ Dashboard and API type regressions fixed
+- ✅ Email delivery utilities and notification hooks are implemented for bookings, enquiries, venue approval, and welcome messages.
+- ✅ Profile management is live for all three roles, including password change and account info updates.
+- ✅ Admin settings screens and moderation toggles are in place.
+- ⏳ Availability calendar and conflict detection remain open.
+- ⏳ Payment integration is still targeted for Phase 5.
+- ⏳ Password recovery, invoice generation, and final production hardening are pending.
 
 **Completed:**
 
 - ✅ Authentication & role-based access
 - ✅ Venue management (CRUD, approval workflow)
-- ✅ Booking system (create, status management)
+- ✅ Booking system (create, manage, confirm/cancel)
 - ✅ Enquiry system (customer-owner communication)
 - ✅ Review & rating system
 - ✅ Advanced search & filtering
 - ✅ Dashboard analytics
+- ✅ Email notifications infrastructure
+- ✅ Account profile management
+- ✅ Admin platform settings UI
 
-**Planned in Phase 4:**
+**Still pending:**
 
-- 🔄 Email notifications
-- 🔄 Profile management
-- 🔄 Calendar availability view
-- 🔄 Admin enhancements
+- 🔄 Venue availability calendar and date blocking
+- 🔄 Razorpay payment flow
+- 🔄 Password reset workflow
+- 🔄 Invoice generation and booking modifications
+- 🔄 Security hardening, monitoring, and QA automation
 
-**Planned in Phase 5:**
+**Verification note:**
 
-- 🔄 Payment integration (Razorpay)
-- 🔄 Production monitoring and security hardening
-- 🔄 Performance optimization and advanced analytics
+- The project has active code for Phase 4 features, but the final build verification should be rerun after clearing an existing stale `next build` process in the environment.
 
 ## 🤝 Contributing
 

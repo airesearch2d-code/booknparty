@@ -2,23 +2,50 @@
 
 ## Overview
 
-Phase 4 focuses on enhancing the BookNParty platform with notifications, profile management, and improved user experience features. This phase improves platform usability and communication while maintaining the manual booking confirmation workflow.
+Phase 4 was expected to expand the product with notifications, profile management, availability tooling, and deeper admin management. In the current codebase, the team has already shipped the notification and profile work, while the calendar and a few production-hardening items remain open.
 
-**Note**: Payment integration has been deferred to Phase 5 (requires Razorpay account setup).
+**Current status (August 31, 2026):**
 
-**Target Start**: After Phase 3 verification  
-**Estimated Duration**: 2-3 weeks  
-**Priority**: High (improves platform usability)
+- ✅ Email notifications are live via Resend and triggered from booking, enquiry, venue approval, and welcome flows.
+- ✅ Profile, password-change, and role-based account management pages are implemented.
+- ✅ Admin settings UI exists for moderation toggles and communication defaults.
+- ⏳ Availability calendar and conflict prevention remain pending.
+- ⏳ Payment integration is deferred to Phase 5.
+
+**Target state**: Complete the remaining UX and operational items before the payment and production scale phase.
 
 ---
 
-## Phase 4 Goals
+## Phase 4 Status Summary
 
-1. **Improve Communication**: Add email notifications for key events
-2. **Enhance UX**: Add profile management and user preferences
-3. **Prevent Conflicts**: Implement calendar-based availability system
-4. **Admin Tools**: Complete admin dashboard functionality
-5. **Essential Features**: Password recovery, invoice generation
+### Already implemented
+
+1. **Notifications system**
+   - Resend-based email utility in `src/lib/email.ts`
+   - Booking confirmation emails and owner request alerts
+   - Enquiry response emails and venue approval emails
+   - Welcome email on registration
+
+2. **Profile management**
+   - `/dashboard/customer/profile`
+   - `/dashboard/owner/profile`
+   - `/dashboard/admin/profile`
+   - `GET/PATCH /api/user/profile`
+   - `POST /api/user/change-password`
+   - `ProfileForm` and `ChangePasswordForm`
+
+3. **Admin enhancements**
+   - `/dashboard/admin/settings`
+   - `PlatformSettingsForm`
+   - Platform summary cards and moderation settings access
+
+### Still pending
+
+- Venue availability calendar and block-date logic
+- Calendar conflict detection and date availability checks
+- Password recovery via reset emails and secure tokens
+- Invoices and booking modification workflows
+- Performance and QA polish for the remaining Phase 4 surface area
 
 ---
 
@@ -26,138 +53,65 @@ Phase 4 focuses on enhancing the BookNParty platform with notifications, profile
 
 ### Feature: Email Notifications
 
-**Status**: Not Started  
-**Estimated Effort**: 4-5 hours  
-**Priority**: P0 (Highest)
+**Status**: Complete in current codebase  
+**Priority**: P0 (Done)
 
-**Description:**  
-Send automated emails for key events (booking confirmations, enquiry responses, venue approvals).
+**Implemented files:**
 
-**Email Service Options:**
+- `src/lib/email.ts`
+- `src/app/api/register/route.ts`
+- `src/app/api/bookings/route.ts`
+- `src/app/api/bookings/[id]/route.ts`
+- `src/app/api/enquiries/route.ts`
+- `src/app/api/enquiries/[id]/route.ts`
+- `src/app/api/venues/[id]/route.ts`
 
-1. **Resend** (recommended) - Modern, Next.js-friendly
-2. **SendGrid** - Established, free tier available
-3. **AWS SES** - Cost-effective for scale
-4. **Nodemailer + Gmail** - Quick setup for testing
+**Live flows:**
 
-**Email Templates Needed:**
+- Booking request confirmation to customer
+- Booking request notice to owner
+- Booking status emails to customer
+- Enquiry notification to owner
+- Enquiry response to customer
+- Venue approval/rejection to owner
+- Welcome email on registration
 
-1. **Booking Confirmation** (to customer)
-   - Booking details, venue info, event date
-   - Payment receipt
-   - Contact information
+**Remaining work:**
 
-2. **Booking Request** (to owner)
-   - Customer details, booking request
-   - Confirm/Cancel action links
-
-3. **Enquiry Submission** (to owner)
-   - Customer message, contact info
-   - Reply button/link
-
-4. **Enquiry Response** (to customer)
-   - Owner's response
-   - Booking suggestion link
-
-5. **Venue Approval** (to owner)
-   - Approval/rejection notification
-   - Feedback (if rejected)
-
-6. **Welcome Email** (on registration)
-   - Account confirmation
-   - Getting started guide
-
-**Implementation Steps:**
-
-1. Install email service SDK
-2. Create `/lib/email.ts` utility
-3. Create email templates (React Email or HTML)
-4. Add email sending to API routes:
-   - After booking creation
-   - After payment verification
-   - After enquiry submission/response
-   - After venue approval/rejection
-5. Add email preferences to user profile
-
-**Files to Create:**
-
-- `src/lib/email.ts` - Email utility functions
-- `src/emails/*.tsx` - Email templates (if using React Email)
-
-**Files to Modify:**
-
-- `src/app/api/bookings/route.ts` - Send booking emails
-- `src/app/api/enquiries/route.ts` - Send enquiry emails
-- `src/app/api/venues/[id]/route.ts` - Send approval emails
-
-**Environment Variables:**
-
-```env
-EMAIL_SERVICE_API_KEY=xxxxxxxxxxxx
-EMAIL_FROM=noreply@booknparty.com
-EMAIL_FROM_NAME=BookNParty
-```
-
-**Acceptance Criteria:**
-
-- ✅ Customers receive booking confirmation emails
-- ✅ Owners receive booking notification emails
-- ✅ Enquiry responses trigger emails
-- ✅ Venue approval/rejection sends emails
-- ✅ Email unsubscribe option available
+- Add unsubscribe or email preferences controls
+- Add richer template customization for brand settings
 
 ---
 
-## � Priority 2: Profile Management
+## 🟡 Priority 2: Profile Management
 
 ### Feature: User Profile Pages
 
-**Status**: Not Started  
-**Estimated Effort**: 3-4 hours  
-**Priority**: P1 (High)
+**Status**: Complete in current codebase  
+**Priority**: P1 (Done)
 
-**Description:**  
-Allow users to manage their profiles, change passwords, update contact information, and upload avatars.
+**Implemented pages:**
 
-**Pages to Create:**
+- `/dashboard/customer/profile`
+- `/dashboard/owner/profile`
+- `/dashboard/admin/profile`
 
-1. `/dashboard/customer/profile` - Customer profile
-2. `/dashboard/owner/profile` - Owner profile
-3. `/dashboard/admin/profile` - Admin profile
+**Implemented API:**
 
-**Features:**
+- `GET /api/user/profile`
+- `PATCH /api/user/profile`
+- `POST /api/user/change-password`
 
-- Update name, phone, email
-- Change password (with current password verification)
-- Upload avatar (Cloudinary integration)
-- View account statistics
-- Delete account (with confirmation)
+**Implemented components:**
 
-**API Endpoints:**
-
-- `GET /api/user/profile` - Get current user profile
-- `PATCH /api/user/profile` - Update profile
-- `POST /api/user/change-password` - Change password
-- `POST /api/user/upload-avatar` - Upload avatar
-
-**Files to Create:**
-
-- `src/app/dashboard/customer/profile/page.tsx`
-- `src/app/dashboard/owner/profile/page.tsx`
-- `src/app/dashboard/admin/profile/page.tsx`
-- `src/app/api/user/profile/route.ts`
-- `src/app/api/user/change-password/route.ts`
 - `src/components/ProfileForm.tsx`
 - `src/components/ChangePasswordForm.tsx`
-- `src/components/AvatarUpload.tsx`
 
-**Acceptance Criteria:**
+**Remaining work:**
 
-- ✅ Users can update their information
-- ✅ Password change requires current password
-- ✅ Avatar upload works via Cloudinary
-- ✅ Email change sends verification (if implemented)
-- ✅ Account deletion works with confirmation
+- Real avatar upload integration with Cloudinary or an upload widget
+- Account deletion confirmation flow
+- Email verification workflow for changed addresses
 
 ---
 
@@ -169,54 +123,25 @@ Allow users to manage their profiles, change passwords, update contact informati
 **Estimated Effort**: 6-8 hours  
 **Priority**: P2 (Medium)
 
-**Description:**  
-Add calendar view for venue availability, preventing double-bookings and showing owners their booking schedule.
+**Pending tasks:**
 
-**Features:**
+- Monthly/weekly availability calendar
+- Show existing bookings and block dates
+- Prevent double-booking before confirm
+- Expose availability to customers on booking pages
 
-- Monthly/weekly calendar view
-- Show existing bookings on calendar
-- Block out unavailable dates (owners)
-- Check availability before booking (customers)
-- Conflict detection
-
-**Components:**
-
-- Use `react-big-calendar` or `@fullcalendar/react`
-- Month view with booking indicators
-- Day/time slot selection
-
-**API Endpoints:**
-
-- `GET /api/venues/[id]/availability?month=2026-08` - Get availability
-- `POST /api/venues/[id]/block-dates` - Owner blocks dates
-
-**Database Changes:**
-
-```prisma
-model VenueBlockedDate {
-  id        String   @id @default(cuid())
-  venueId   String
-  date      DateTime
-  reason    String?
-  venue     Venue    @relation(fields: [venueId], references: [id])
-  createdAt DateTime @default(now())
-}
-```
-
-**Files to Create:**
+**Planned files:**
 
 - `src/components/AvailabilityCalendar.tsx`
 - `src/app/api/venues/[id]/availability/route.ts`
 - `src/app/api/venues/[id]/block-dates/route.ts`
 
-**Acceptance Criteria:**
+**Acceptance criteria:**
 
-- ✅ Calendar shows booked dates
-- ✅ Double-booking prevention
-- ✅ Owners can block dates
-- ✅ Customers see real-time availability
-- ✅ Date selection is intuitive
+- Calendar shows booked dates
+- Owners can block dates
+- Customer booking flow checks real availability
+- Double-booking prevention is enforced
 
 ---
 
@@ -224,29 +149,75 @@ model VenueBlockedDate {
 
 ### Features: Admin Dashboard Improvements
 
-**Status**: Partially Complete  
+**Status**: Partially complete  
 **Estimated Effort**: 3-4 hours  
-**Priority**: P3 (Low-Medium)
+**Priority**: P3 (Medium)
 
-**Missing Pages:**
+**Completed in code:**
 
-1. `/dashboard/admin/bookings` - All bookings view
-2. `/dashboard/admin/enquiries` - All enquiries view
-3. `/dashboard/admin/settings` - Platform settings
-
-**Features:**
-
-- Advanced filtering and search
-- Export data as CSV
-- Bulk actions
-- Platform statistics
-- Revenue reports
-
-**Files to Create:**
-
-- `src/app/dashboard/admin/bookings/page.tsx`
-- `src/app/dashboard/admin/enquiries/page.tsx`
 - `src/app/dashboard/admin/settings/page.tsx`
+- `src/components/PlatformSettingsForm.tsx`
+- Summary cards for moderation overview
+
+**Still pending:**
+
+- Full export and bulk actions for bookings/enquiries
+- Advanced filtering and reporting views
+- Analytics and revenue reporting polish
+
+---
+
+## 🔵 Priority 5: Additional Features
+
+### Password Recovery
+
+**Status**: Not Started  
+**Priority**: P3
+
+### Invoice Generation
+
+**Status**: Not Started  
+**Priority**: P3
+
+### Booking Modifications
+
+**Status**: Not Started  
+**Priority**: P3
+
+### Analytics Dashboard
+
+**Status**: Basic analytics exist; richer reporting remains pending  
+**Priority**: P3
+
+### Performance & QA
+
+**Status**: Not Started  
+**Priority**: P4
+
+---
+
+## Phase 4 Completion Checklist
+
+Phase 4 is considered complete only when all of the following are true:
+
+- ✅ All email notification flows are fully validated
+- ✅ Profile management works across all roles
+- ✅ Availability calendar and conflict detection are implemented
+- ✅ Admin tools are complete enough for operational use
+- ✅ Security and reset flows are in place
+- ✅ Documentation reflects the latest code state
+- ✅ Final production build passes after stale processes are cleared
+
+---
+
+## Success Criteria
+
+Phase 4 is ready to close when:
+
+- Users can manage account information confidently
+- Owners can review booking communication cleanly
+- Admins can operate moderation settings without manual code changes
+- Payment and availability tasks are the only major remaining blocks before Phase 5
 
 **Acceptance Criteria:**
 

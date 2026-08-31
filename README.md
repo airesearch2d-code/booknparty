@@ -8,8 +8,9 @@ A comprehensive venue booking platform built with Next.js 16, Prisma 7, and Post
 # Install dependencies
 npm install
 
-# Set up environment variables (see .env.local.example)
-cp .env.local.example .env.local
+# Create local environment variables
+copy NUL .env.local
+# Then fill in DATABASE_URL, AUTH_SECRET, RESEND_API_KEY, and related keys
 
 # Sync database schema
 npx prisma db push
@@ -66,38 +67,41 @@ All major AI coding assistants (GitHub Copilot, Cursor, Claude, Windsurf, etc.) 
 
 ## 📦 Project Status
 
-**Current Phase**: Phase 4 (Planning/Execution)
+**Current Phase**: Phase 4 (In Progress)
 
-**Phase 3**: Feature delivery complete (6/7), payment intentionally deferred to Phase 5
+**Latest development snapshot (August 31, 2026):**
 
-**✅ Verified in Build:**
+- ✅ Email notification flows are in place for booking, enquiry, venue approval, and welcome messaging via Resend.
+- ✅ Profile management pages are implemented across customer, owner, and admin roles, including profile updates and password changes.
+- ✅ Admin settings UI is present for moderation and communication toggles.
+- ⏳ Calendar availability, date blocking, and conflict prevention remain open.
+- ⏳ Payment integration is still deferred to Phase 5.
+- ⏳ Password recovery, invoices, and additional platform hardening are pending.
 
-- Production build successful
-- TypeScript check passed (0 errors)
-- Phase 3 dashboard and API regressions fixed
-
-**✅ Complete:**
+**Completed core work:**
 
 - Authentication & role-based access
-- Venue management (CRUD, approval)
-- Booking system (create, manage)
-- Enquiry system
-- Review & rating system
-- Advanced search & filtering
+- Venue management (CRUD, approval workflow)
+- Booking lifecycle management
+- Enquiry system and owner responses
+- Review & rating validation
+- Advanced filtering and search
 - Dashboard analytics
+- Email notification layer
+- Profile + password management
+- Admin platform settings UI
 
-**⏳ Planned in Phase 4:**
+**Pending priorities:**
 
-- Email notifications
-- Profile management
-- Calendar availability
-- Admin enhancements
-
-**⏳ Planned in Phase 5:**
-
+- Venue availability calendar and date blocking
 - Payment integration (Razorpay)
-- Production monitoring and security hardening
-- Performance optimization and advanced analytics
+- Password recovery flow
+- Invoice generation and booking modifications
+- Production security, performance tuning, and automated QA
+
+**Verification note:**
+
+- A previous `next build` instance is still active in the workspace environment, so a fresh final build run must be completed after clearing the stale process.
 
 ## 🚦 Common Commands
 

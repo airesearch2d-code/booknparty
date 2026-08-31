@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { sendBookingConfirmationToCustomer, sendBookingRequestToOwner } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -11,7 +12,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { venueId, eventDate, hours, guestCount, eventType, notes } = body;
 
-    const venue = await prisma.venue.findUnique({ where: { id: venueId } });
+    const venue = await prisma.venue.findUnique({
+        where: { id: venueId },
+        include: { owner: { select: { name: true, email: true } } },
+    });
     if (!venue) return NextResponse.json({ error: "Venue not found" }, { status: 404 });
 
     const totalAmount = venue.pricePerHour * hours;
@@ -29,6 +33,42 @@ export async function POST(req: NextRequest) {
         },
         include: { venue: { select: { name: true } } },
     });
+
+    // Send email notifications in the background (non-blocking)
+    const customer = await prisma.user.findUnique({
+        where: { id: session.user!.id! },
+        select: { name: true, email: true, phone: true },
+    });
+    if (customer) {
+        Promise.all([
+            sendBookingConfirmationToCustomer({
+                customerEmail: customer.email,
+                customerName: customer.name,
+                venueName: venue.name,
+                venueCity: venue.city,
+                eventDate: booking.eventDate,
+                hours,
+                guestCount,
+                totalAmount,
+                eventType,
+                bookingId: booking.id,
+            }),
+            sendBookingRequestToOwner({
+                ownerEmail: venue.owner.email,
+                ownerName: venue.owner.name,
+                customerName: customer.name,
+                customerEmail: customer.email,
+                customerPhone: customer.phone,
+                venueName: venue.name,
+                eventDate: booking.eventDate,
+                hours,
+                guestCount,
+                totalAmount,
+                eventType,
+                bookingId: booking.id,
+            }),
+        ]).catch(console.error);
+    }
 
     return NextResponse.json({ booking }, { status: 201 });
 }

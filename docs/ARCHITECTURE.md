@@ -4,6 +4,8 @@
 
 BookNParty follows a modern **Next.js App Router** architecture with **Server Components** by default, **API Routes** for backend logic, and **Prisma ORM** for type-safe database access.
 
+**Latest implementation note (August 31, 2026):** the codebase now includes email automation, profile management APIs, and a platform settings screen in addition to the original booking, enquiry, venue, and review flows.
+
 ---
 
 ## Architecture Principles

@@ -30,6 +30,7 @@ const navItems = {
         { href: "/dashboard/admin/bookings", icon: CalendarCheck, label: "Bookings" },
         { href: "/dashboard/admin/enquiries", icon: MessageSquare, label: "Enquiries" },
         { href: "/dashboard/admin/settings", icon: Settings, label: "Settings" },
+        { href: "/dashboard/admin/profile", icon: User, label: "Profile" },
     ],
 };
 

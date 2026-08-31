@@ -1,6 +1,16 @@
 # BookNParty - Verification Checklist
 
-This checklist ensures all Phase 3 features are working correctly before moving to Phase 4.
+This checklist reflects the current project state: Phase 3 functionality is in place, Phase 4 email/profile work is implemented in code, and the remaining open items are the calendar/availability layer and the final production hardening pass.
+
+## Current Status Snapshot
+
+- [x] Core booking, venue, enquiry, and review flows are implemented
+- [x] Email notification utilities are wired into key flows
+- [x] Profile management and password changes are present for all roles
+- [x] Admin settings screen exists for platform controls
+- [ ] Availability calendar and conflict detection are implemented
+- [ ] Payment flow and Razorpay handoff are implemented
+- [ ] Final build verification is rerun after clearing stale `next build` processes
 
 ## Pre-Verification Setup
 

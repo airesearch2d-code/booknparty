@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendEnquiryResponseToCustomer } from "@/lib/email";
 
 export async function PATCH(
     req: Request,
@@ -19,7 +20,7 @@ export async function PATCH(
     try {
         const enquiry = await prisma.enquiry.findUnique({
             where: { id },
-            include: { venue: { select: { ownerId: true } } },
+            include: { venue: { select: { ownerId: true, name: true } } },
         });
 
         if (!enquiry) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -33,6 +34,25 @@ export async function PATCH(
             where: { id },
             data: { response, status: "RESPONDED" as any },
         });
+
+        // Notify the customer who submitted the enquiry
+        const customer = await prisma.user.findUnique({
+            where: { id: enquiry.customerId },
+            select: { name: true, email: true },
+        });
+        const ownerUser = await prisma.user.findUnique({
+            where: { id: enquiry.venue.ownerId },
+            select: { name: true },
+        });
+        if (customer && ownerUser) {
+            sendEnquiryResponseToCustomer({
+                customerEmail: customer.email,
+                customerName: customer.name,
+                venueName: enquiry.venue.name,
+                ownerName: ownerUser.name,
+                ownerResponse: response,
+            }).catch(console.error);
+        }
 
         return NextResponse.json({ enquiry: updated });
     } catch {
