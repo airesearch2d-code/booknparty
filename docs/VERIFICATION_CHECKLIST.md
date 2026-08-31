@@ -356,7 +356,7 @@ Test in multiple browsers:
 
 These are expected and documented:
 
-- ✅ Payment integration not implemented (Phase 4)
+- ✅ Payment integration not implemented (Phase 5)
 - ✅ No email notifications (Phase 4)
 - ✅ No password recovery (Phase 4)
 - ✅ No profile edit pages (Phase 4)
