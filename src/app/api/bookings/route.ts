@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const booking = await prisma.booking.create({
         data: {
             venueId,
-            customerId: session.user.id!,
+            customerId: session.user!.id!,
             eventDate: new Date(eventDate),
             hours,
             guestCount,
@@ -42,8 +42,8 @@ export async function GET(req: NextRequest) {
         role === "ADMIN"
             ? {}
             : role === "OWNER"
-                ? { venue: { ownerId: session.user.id! } }
-                : { customerId: session.user.id! };
+                ? { venue: { ownerId: session.user!.id! } }
+                : { customerId: session.user!.id! };
 
     const bookings = await prisma.booking.findMany({
         where,

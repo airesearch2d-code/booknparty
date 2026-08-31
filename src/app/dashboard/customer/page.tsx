@@ -10,7 +10,7 @@ export default async function CustomerDashboard() {
     const session = await auth();
     if (!session || (session.user as any).role !== "CUSTOMER") redirect("/login");
 
-    const userId = session.user.id!;
+    const userId = session.user!.id!;
 
     const [bookings, enquiries] = await Promise.all([
         prisma.booking.findMany({
@@ -44,7 +44,7 @@ export default async function CustomerDashboard() {
         <DashboardLayout role="CUSTOMER">
             <div className="max-w-6xl">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-white">Welcome back, {session.user.name?.split(" ")[0]}! 👋</h1>
+                    <h1 className="text-3xl font-bold text-white">Welcome back, {session.user!.name?.split(" ")[0]}! 👋</h1>
                     <p className="text-white/50 mt-1">Here's an overview of your activity</p>
                 </div>
 
@@ -121,7 +121,7 @@ export default async function CustomerDashboard() {
                                     <div key={enq.id} className="p-3 rounded-xl bg-white/5">
                                         <div className="flex justify-between mb-1">
                                             <p className="text-white text-sm font-medium">{enq.venue.name}</p>
-                                            <span className={`badge text-xs ${enq.status === "NEW" ? "bg-blue-500/20 text-blue-300" : enq.status === "REPLIED" ? "bg-green-500/20 text-green-300" : "bg-gray-500/20 text-gray-300"}`}>{enq.status}</span>
+                                            <span className={`badge text-xs ${enq.status === "PENDING" ? "bg-blue-500/20 text-blue-300" : enq.status === "RESPONDED" ? "bg-green-500/20 text-green-300" : "bg-gray-500/20 text-gray-300"}`}>{enq.status}</span>
                                         </div>
                                         <p className="text-white/40 text-xs">{enq.eventType} · {enq.guestCount} guests · {formatDate(enq.createdAt)}</p>
                                     </div>

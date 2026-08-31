@@ -6,17 +6,29 @@ import { Building2, CalendarCheck, MessageSquare, TrendingUp, Plus, Eye, Edit, C
 import { formatCurrency, formatDate, getVenueTypeLabel } from "@/lib/utils";
 import Link from "next/link";
 
+// Generate last 6 months labels and keys
+function getLast6Months() {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        months.push({ label: d.toLocaleString("default", { month: "short" }), year: d.getFullYear(), month: d.getMonth() });
+    }
+    return months;
+}
+
 export default async function OwnerDashboard() {
     const session = await auth();
-    if (!session || (session.user as any).role !== "OWNER") redirect("/login");
+    if (!session || !session.user || (session.user as any).role !== "OWNER") redirect("/login");
 
     const userId = session.user.id!;
 
-    const [venues, recentBookings, recentEnquiries] = await Promise.all([
+    const [venues, allBookings, recentEnquiries] = await Promise.all([
         prisma.venue.findMany({
             where: { ownerId: userId },
             include: { _count: { select: { bookings: true, enquiries: true } } },
         }),
+        // Fetch ALL bookings (no take limit) for real revenue
         prisma.booking.findMany({
             where: { venue: { ownerId: userId } },
             include: {
@@ -24,7 +36,6 @@ export default async function OwnerDashboard() {
                 customer: { select: { name: true, email: true } },
             },
             orderBy: { createdAt: "desc" },
-            take: 6,
         }),
         prisma.enquiry.findMany({
             where: { venue: { ownerId: userId } },
@@ -34,9 +45,23 @@ export default async function OwnerDashboard() {
         }),
     ]);
 
-    const totalRevenue = recentBookings
-        .filter(b => b.status === "CONFIRMED" || b.status === "COMPLETED")
-        .reduce((sum, b) => sum + b.totalAmount, 0);
+    const confirmedBookings = allBookings.filter(b => b.status === "CONFIRMED" || b.status === "COMPLETED");
+    const totalRevenue = confirmedBookings.reduce((sum, b) => sum + b.totalAmount, 0);
+    const recentBookings = allBookings.slice(0, 6);
+    const pendingCount = allBookings.filter(b => b.status === "PENDING").length;
+
+    // Monthly revenue for the last 6 months
+    const months = getLast6Months();
+    const monthlyRevenue = months.map(m => {
+        const total = confirmedBookings
+            .filter(b => {
+                const d = new Date(b.eventDate);
+                return d.getFullYear() === m.year && d.getMonth() === m.month;
+            })
+            .reduce((sum, b) => sum + b.totalAmount, 0);
+        return { ...m, total };
+    });
+    const maxRev = Math.max(...monthlyRevenue.map(m => m.total), 1);
 
     const statusColors: Record<string, string> = {
         PENDING: "bg-yellow-500/20 text-yellow-300",
@@ -47,9 +72,9 @@ export default async function OwnerDashboard() {
 
     const stats = [
         { label: "My Venues", value: venues.length, icon: Building2, color: "from-blue-500 to-blue-700" },
-        { label: "Total Bookings", value: recentBookings.length, icon: CalendarCheck, color: "from-purple-500 to-purple-700" },
-        { label: "Enquiries", value: recentEnquiries.length, icon: MessageSquare, color: "from-pink-500 to-pink-700" },
-        { label: "Revenue (Est.)", value: formatCurrency(totalRevenue), icon: TrendingUp, color: "from-green-500 to-green-700", isText: true },
+        { label: "Total Bookings", value: allBookings.length, icon: CalendarCheck, color: "from-purple-500 to-purple-700" },
+        { label: "Pending Action", value: pendingCount, icon: MessageSquare, color: "from-yellow-500 to-orange-600" },
+        { label: "Total Revenue", value: formatCurrency(totalRevenue), icon: TrendingUp, color: "from-green-500 to-green-700", isText: true },
     ];
 
     return (
@@ -80,6 +105,38 @@ export default async function OwnerDashboard() {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Revenue Chart */}
+                <div className="glass-card rounded-2xl p-6 mb-8">
+                    <h2 className="text-white font-bold text-lg mb-6">Monthly Revenue (Last 6 Months)</h2>
+                    {totalRevenue === 0 ? (
+                        <div className="text-center py-8 text-white/30 text-sm">No confirmed bookings yet — revenue will appear here.</div>
+                    ) : (
+                        <div className="flex items-end gap-3 h-40">
+                            {monthlyRevenue.map((m) => {
+                                const pct = maxRev > 0 ? (m.total / maxRev) * 100 : 0;
+                                return (
+                                    <div key={m.label + m.year} className="flex-1 flex flex-col items-center gap-2">
+                                        <span className="text-white/60 text-xs font-medium">
+                                            {m.total > 0 ? formatCurrency(m.total) : "—"}
+                                        </span>
+                                        <div className="w-full rounded-t-lg bg-white/5 relative overflow-hidden" style={{ height: "80px" }}>
+                                            <div
+                                                className="absolute bottom-0 w-full rounded-t-lg transition-all duration-700"
+                                                style={{
+                                                    height: `${pct}%`,
+                                                    background: "linear-gradient(to top, #a855f7, #ec4899)",
+                                                    minHeight: m.total > 0 ? "4px" : "0",
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="text-white/40 text-xs">{m.label}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -144,7 +201,7 @@ export default async function OwnerDashboard() {
                                             <span className={`badge text-xs ${statusColors[b.status]}`}>{b.status}</span>
                                         </div>
                                         <div className="flex justify-between text-xs text-white/40">
-                                            <span>{b.venue.name} · {b.eventType}</span>
+                                            <span>{b.venue.name}</span>
                                             <span className="font-medium text-white/60">{formatCurrency(b.totalAmount)}</span>
                                         </div>
                                         <p className="text-white/30 text-xs mt-0.5">{formatDate(b.eventDate)}</p>
@@ -171,7 +228,7 @@ export default async function OwnerDashboard() {
                                 <div key={enq.id} className="p-4 rounded-xl bg-white/5">
                                     <div className="flex justify-between mb-2">
                                         <p className="text-white text-sm font-semibold">{enq.name}</p>
-                                        <span className={`badge text-xs ${enq.status === "NEW" ? "bg-blue-500/20 text-blue-300" : "bg-green-500/20 text-green-300"}`}>{enq.status}</span>
+                                        <span className={`badge text-xs ${enq.status === "PENDING" ? "bg-blue-500/20 text-blue-300" : "bg-green-500/20 text-green-300"}`}>{enq.status}</span>
                                     </div>
                                     <p className="text-white/50 text-xs mb-1">{enq.venue.name}</p>
                                     <p className="text-white/40 text-xs">{enq.eventType} · {enq.guestCount} guests</p>
