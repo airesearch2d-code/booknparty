@@ -452,6 +452,6 @@ npm run start
 
 ---
 
-**Last Updated**: August 2026  
+**Last Updated**: September 2, 2026  
 **Node Version**: 20.x  
 **Next.js Version**: 16.3.3

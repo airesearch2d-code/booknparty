@@ -2,7 +2,7 @@
 
 Welcome to the comprehensive documentation for **BookNParty** - a modern venue booking platform.
 
-## 📚 Documentation Index
+## Documentation Index
 
 ### Getting Started
 
@@ -16,7 +16,7 @@ Welcome to the comprehensive documentation for **BookNParty** - a modern venue b
 - **[Database Schema](DATABASE_SCHEMA.md)** - Prisma models, relationships, and data design
 - **[API Reference](API_REFERENCE.md)** - Complete endpoint documentation
 
-### Project Planning
+### Execution and Roadmaps
 
 - **[Phase 3 Status](PHASE_3_STATUS.md)** - Phase 3 completion and verification status
 - **[Phase 4 Roadmap](PHASE_4_ROADMAP.md)** - UX and communication enhancements
@@ -63,15 +63,15 @@ All major AI agents (GitHub Copilot, Cursor, Claude, Windsurf, etc.) can read th
 | **API_REFERENCE**          | Implementing/consuming API endpoints                     |
 | **DEVELOPMENT_GUIDE**      | Setting up local environment, troubleshooting            |
 | **PHASE_3_STATUS**         | Checking what's implemented and what's pending           |
-| **PHASE_4_ROADMAP**        | Planning UX and communication enhancements               |
-| **PHASE_5_ROADMAP**        | Planning payment integration and production scaling      |
+| **PHASE_4_ROADMAP**        | Tracking delivered and pending Phase 4 work              |
+| **PHASE_5_ROADMAP**        | Payment integration and production scaling plan          |
 | **VERIFICATION_CHECKLIST** | Testing features or validating implementation            |
 
-## 🏗️ Project Status
+## Current Status
 
 **Current Phase**: Phase 4 (In Progress)
 
-**Latest development status (August 31, 2026):**
+**Latest development status (September 2, 2026):**
 
 - ✅ Email delivery utilities and notification hooks are implemented for bookings, enquiries, venue approval, and welcome messages.
 - ✅ Profile management is live for all three roles, including password change and account info updates.
@@ -125,5 +125,5 @@ Before making changes:
 
 ---
 
-**Last Updated**: August 31, 2026  
-**Version**: Phase 4 Plan (v0.9)
+**Last Updated**: September 2, 2026  
+**Version**: Phase 4 Execution (v1.0)

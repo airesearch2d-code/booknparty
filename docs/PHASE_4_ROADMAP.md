@@ -2,418 +2,113 @@
 
 ## Overview
 
-Phase 4 was expected to expand the product with notifications, profile management, availability tooling, and deeper admin management. In the current codebase, the team has already shipped the notification and profile work, while the calendar and a few production-hardening items remain open.
+Phase 4 focuses on usability and operations maturity while preserving the current manual booking confirmation model. Communication and profile foundations are now implemented, and the remaining scope is concentrated on availability, safeguards, and operational completeness.
 
-**Current status (August 31, 2026):**
+## Current Status
 
-- ✅ Email notifications are live via Resend and triggered from booking, enquiry, venue approval, and welcome flows.
-- ✅ Profile, password-change, and role-based account management pages are implemented.
-- ✅ Admin settings UI exists for moderation toggles and communication defaults.
-- ⏳ Availability calendar and conflict prevention remain pending.
-- ⏳ Payment integration is deferred to Phase 5.
+- **Current Phase**: Phase 4 (In Progress)
+- **Status**: Notifications, profiles, and admin settings are implemented; availability and hardening items remain
+- **Last Updated**: September 2, 2026
 
-**Target state**: Complete the remaining UX and operational items before the payment and production scale phase.
-
----
-
-## Phase 4 Status Summary
-
-### Already implemented
+## Completed in Phase 4
 
 1. **Notifications system**
    - Resend-based email utility in `src/lib/email.ts`
-   - Booking confirmation emails and owner request alerts
-   - Enquiry response emails and venue approval emails
-   - Welcome email on registration
-
+   - Booking, enquiry, venue approval, and welcome notifications
 2. **Profile management**
-   - `/dashboard/customer/profile`
-   - `/dashboard/owner/profile`
-   - `/dashboard/admin/profile`
+   - Role-based profile pages for customer, owner, and admin
    - `GET/PATCH /api/user/profile`
    - `POST /api/user/change-password`
-   - `ProfileForm` and `ChangePasswordForm`
-
-3. **Admin enhancements**
+3. **Admin settings foundation**
    - `/dashboard/admin/settings`
-   - `PlatformSettingsForm`
-   - Platform summary cards and moderation settings access
+   - `PlatformSettingsForm` and summary cards
 
-### Still pending
+## Remaining Scope
 
-- Venue availability calendar and block-date logic
-- Calendar conflict detection and date availability checks
-- Password recovery via reset emails and secure tokens
-- Invoices and booking modification workflows
-- Performance and QA polish for the remaining Phase 4 surface area
+- Venue availability calendar and owner block-dates flow
+- Availability conflict detection for booking safety
+- Password recovery with expiring reset tokens
+- Invoice generation and booking modification workflow
+- Admin export, bulk actions, and reporting polish
+- Performance, monitoring, and QA improvements
 
----
+## Priority Backlog
 
-## 🔴 Priority 1: Notifications System
+### P2: Calendar and Availability
 
-### Feature: Email Notifications
+- **Status**: Not Started
+- **Estimated Effort**: 6-8 hours
+- **Planned files**:
+  - `src/components/AvailabilityCalendar.tsx`
+  - `src/app/api/venues/[id]/availability/route.ts`
+  - `src/app/api/venues/[id]/block-dates/route.ts`
 
-**Status**: Complete in current codebase  
-**Priority**: P0 (Done)
+### P3: Account and Operations Completion
 
-**Implemented files:**
+- **Status**: Not Started / Partially complete
+- **Estimated Effort**: 10-14 hours combined
+- **Includes**:
+  - Password recovery flow
+  - Invoice generation
+  - Booking modification requests
+  - Admin export, filtering, and reporting improvements
 
-- `src/lib/email.ts`
-- `src/app/api/register/route.ts`
-- `src/app/api/bookings/route.ts`
-- `src/app/api/bookings/[id]/route.ts`
-- `src/app/api/enquiries/route.ts`
-- `src/app/api/enquiries/[id]/route.ts`
-- `src/app/api/venues/[id]/route.ts`
+### P4: Quality and Hardening
 
-**Live flows:**
+- **Status**: Not Started
+- **Estimated Effort**: 10-13 hours combined
+- **Includes**:
+  - Testing setup (unit, integration, and E2E)
+  - Performance optimization and query tuning
+  - Error tracking and monitoring integration
 
-- Booking request confirmation to customer
-- Booking request notice to owner
-- Booking status emails to customer
-- Enquiry notification to owner
-- Enquiry response to customer
-- Venue approval/rejection to owner
-- Welcome email on registration
+## Sprint Plan (Remaining)
 
-**Remaining work:**
+### Sprint A: Availability Core
 
-- Add unsubscribe or email preferences controls
-- Add richer template customization for brand settings
+- Implement availability APIs and calendar UI
+- Add block-date support and conflict guards
 
----
+### Sprint B: Account and Admin Completion
 
-## 🟡 Priority 2: Profile Management
+- Implement password recovery and invoice workflow
+- Deliver admin export/filter/reporting improvements
 
-### Feature: User Profile Pages
+### Sprint C: Quality Gate
 
-**Status**: Complete in current codebase  
-**Priority**: P1 (Done)
+- Add automated test baseline
+- Add monitoring hooks and performance polish
+- Run full verification pass and documentation update
 
-**Implemented pages:**
+## Completion Criteria
 
-- `/dashboard/customer/profile`
-- `/dashboard/owner/profile`
-- `/dashboard/admin/profile`
+Phase 4 is complete when all of the following are true:
 
-**Implemented API:**
-
-- `GET /api/user/profile`
-- `PATCH /api/user/profile`
-- `POST /api/user/change-password`
-
-**Implemented components:**
-
-- `src/components/ProfileForm.tsx`
-- `src/components/ChangePasswordForm.tsx`
-
-**Remaining work:**
-
-- Real avatar upload integration with Cloudinary or an upload widget
-- Account deletion confirmation flow
-- Email verification workflow for changed addresses
-
----
-
-## 🟡 Priority 3: Calendar & Availability
-
-### Feature: Venue Availability Calendar
-
-**Status**: Not Started  
-**Estimated Effort**: 6-8 hours  
-**Priority**: P2 (Medium)
-
-**Pending tasks:**
-
-- Monthly/weekly availability calendar
-- Show existing bookings and block dates
-- Prevent double-booking before confirm
-- Expose availability to customers on booking pages
-
-**Planned files:**
-
-- `src/components/AvailabilityCalendar.tsx`
-- `src/app/api/venues/[id]/availability/route.ts`
-- `src/app/api/venues/[id]/block-dates/route.ts`
-
-**Acceptance criteria:**
-
-- Calendar shows booked dates
-- Owners can block dates
-- Customer booking flow checks real availability
-- Double-booking prevention is enforced
-
----
-
-## 🟢 Priority 4: Admin Enhancements
-
-### Features: Admin Dashboard Improvements
-
-**Status**: Partially complete  
-**Estimated Effort**: 3-4 hours  
-**Priority**: P3 (Medium)
-
-**Completed in code:**
-
-- `src/app/dashboard/admin/settings/page.tsx`
-- `src/components/PlatformSettingsForm.tsx`
-- Summary cards for moderation overview
-
-**Still pending:**
-
-- Full export and bulk actions for bookings/enquiries
-- Advanced filtering and reporting views
-- Analytics and revenue reporting polish
-
----
-
-## 🔵 Priority 5: Additional Features
-
-### Password Recovery
-
-**Status**: Not Started  
-**Priority**: P3
-
-### Invoice Generation
-
-**Status**: Not Started  
-**Priority**: P3
-
-### Booking Modifications
-
-**Status**: Not Started  
-**Priority**: P3
-
-### Analytics Dashboard
-
-**Status**: Basic analytics exist; richer reporting remains pending  
-**Priority**: P3
-
-### Performance & QA
-
-**Status**: Not Started  
-**Priority**: P4
-
----
-
-## Phase 4 Completion Checklist
-
-Phase 4 is considered complete only when all of the following are true:
-
-- ✅ All email notification flows are fully validated
-- ✅ Profile management works across all roles
-- ✅ Availability calendar and conflict detection are implemented
-- ✅ Admin tools are complete enough for operational use
-- ✅ Security and reset flows are in place
-- ✅ Documentation reflects the latest code state
-- ✅ Final production build passes after stale processes are cleared
-
----
-
-## Success Criteria
-
-Phase 4 is ready to close when:
-
-- Users can manage account information confidently
-- Owners can review booking communication cleanly
-- Admins can operate moderation settings without manual code changes
-- Payment and availability tasks are the only major remaining blocks before Phase 5
-
-**Acceptance Criteria:**
-
-- ✅ Admin can view all bookings with filters
-- ✅ Admin can view all enquiries
-- ✅ Admin can configure platform settings
-- ✅ Export functionality works
-- ✅ Bulk actions available
-
----
-
-## 🟢 Priority 4: Additional Features
-
-### Feature: Password Recovery
-
-**Status**: Not Started  
-**Estimated Effort**: 2-3 hours  
-**Priority**: P3 (Low-Medium)
-
-**Implementation:**
-
-- "Forgot Password" link on login page
-- Send password reset email with token
-- Reset password page with token validation
-- Token expiration (1 hour)
-
-**Database Changes:**
-
-```prisma
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-}
-```
-
----
-
-### Feature: Invoice Generation
-
-**Status**: Not Started  
-**Estimated Effort**: 3-4 hours  
-**Priority**: P3 (Low-Medium)
-
-**Implementation:**
-
-- Generate PDF invoices for bookings
-- Use `jspdf` or `react-pdf`
-- Include booking details, pricing breakdown, GST
-- Email invoice with booking confirmation
-- Download invoice from dashboard
-
----
-
-### Feature: Booking Modifications
-
-**Status**: Not Started  
-**Estimated Effort**: 4-5 hours  
-**Priority**: P3 (Low-Medium)
-
-**Implementation:**
-
-- Allow customers to request reschedule
-- Owner approves/rejects modification
-- Handle date conflicts
-- Refund calculation if price changes
-
----
-
-### Feature: Analytics Dashboard
-
-**Status**: Basic stats only  
-**Estimated Effort**: 6-8 hours  
-**Priority**: P3 (Low-Medium)
-
-**Features:**
-
-- Revenue charts (line, bar)
-- Booking trends over time
-- Top venues by bookings/revenue
-- Customer demographics
-- Conversion funnel
-
-**Libraries:**
-
-- Chart.js or Recharts
-- Date range selector
-- Export charts as images
-
----
-
-## 🔵 Priority 5: Performance & Quality
-
-### Performance Optimizations
-
-**Estimated Effort**: 2-3 hours  
-**Priority**: P4 (Nice to have)
-
-**Tasks:**
-
-- Add React Query for data caching
-- Implement ISR for venue pages
-- Optimize images (WebP, lazy loading)
-- Bundle analysis and code splitting
-- Database query optimization
-
----
-
-### Testing Setup
-
-**Estimated Effort**: 6-8 hours  
-**Priority**: P4 (Nice to have)
-
-**Implementation:**
-
-- Unit tests (Jest + React Testing Library)
-- Integration tests for API routes
-- E2E tests (Playwright)
-- Test coverage reporting
-
----
-
-### Error Tracking & Monitoring
-
-**Estimated Effort**: 2-3 hours  
-**Priority**: P4 (Nice to have)
-
-**Tools:**
-
-- Sentry for error tracking
-- Vercel Analytics for performance
-- PostHog for user analytics
-
----
-
-## Phase 4 Sprint Plan
-
-### Sprint 1 (Week 1): Notifications & Profile
-
-- **Days 1-3**: Email notification system
-- **Days 4-5**: Profile management pages
-
-### Sprint 2 (Week 2): Calendar & Admin
-
-- **Days 1-3**: Calendar availability feature
-- **Days 4-5**: Admin dashboard enhancements
-
-### Sprint 3 (Week 3): Additional Features & Polish
-
-- **Days 1-2**: Password recovery
-- **Days 3-4**: Invoice generation (optional)
-- **Day 5**: Testing, bug fixes, documentation
-
----
-
-## Success Criteria
-
-Phase 4 is complete when:
-
-- ✅ Email notifications sent for key events
-- ✅ Profile management functional
-- ✅ Calendar shows availability
-- ✅ Password recovery works
-- ✅ Admin dashboard complete
-- ✅ All critical bugs fixed
-- ✅ Documentation updated
-- ✅ Build passes without errors
-- ✅ Manual testing checklist passed
-
-**Note**: Payment integration deferred to Phase 5 (requires Razorpay account)
-
----
+- Email and profile flows are verified across roles
+- Availability calendar and conflict prevention are implemented
+- Password recovery and invoice workflow are implemented
+- Admin operational tooling is complete for daily platform use
+- Documentation and verification artifacts reflect the final state
+- Final production build passes in a clean environment
 
 ## Dependencies
 
-**External Services:**
+### External Services
 
-- Email service account (Resend/SendGrid) - Required
-- Cloudinary (already configured) - Ready
+- Resend account and sender identity configured
+- Cloudinary configuration available
 
-**Technical:**
+### Technical Prerequisites
 
-- Database migration needed for calendar feature (VenueBlockedDate model)
-- Compatible with current Next.js/Prisma versions
+- Database migration for availability/block-date support
+- Stable Next.js/Prisma environment for final build verification
 
-**Deferred to Phase 5:**
+### Deferred to Phase 5
 
-- Razorpay account (payment integration)
-- Payment processing infrastructure
+- Razorpay account and payment processing infrastructure
 
 ---
 
-**Last Updated**: August 31, 2026  
-**Status**: Planning Phase  
-**Start Date**: After Phase 3 verification complete  
+**Last Updated**: September 2, 2026
+**Status**: Execution Phase
 **Payment Integration**: Deferred to Phase 5

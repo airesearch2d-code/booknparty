@@ -167,7 +167,7 @@ Booking requests from customers.
 | `guestCount`  | Int           | Required         | Expected attendees                    |
 | `totalAmount` | Float         | Required         | Calculated: pricePerHour × hours      |
 | `status`      | BookingStatus | Default: PENDING | Current state                         |
-| `paymentId`   | String        | Optional         | Payment gateway ID (Phase 4)          |
+| `paymentId`   | String        | Optional         | Payment gateway ID (planned for Phase 5) |
 | `notes`       | String        | Optional         | Customer notes to owner               |
 | `createdAt`   | DateTime      | Auto             | Booking request timestamp             |
 | `updatedAt`   | DateTime      | Auto             | Last status change                    |
@@ -409,6 +409,6 @@ const avgRating = await prisma.review.aggregate({
 
 ---
 
-**Last Updated**: August 2026  
-**Schema Version**: Phase 3 (Aligned)  
+**Last Updated**: September 2, 2026  
+**Schema Version**: Phase 4 execution baseline  
 **Total Models**: 5 (User, Venue, Booking, Enquiry, Review)
