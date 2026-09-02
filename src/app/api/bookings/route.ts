@@ -10,7 +10,29 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { venueId, eventDate, hours, guestCount, eventType, notes } = body;
+    const venueId = body.venueId as string | undefined;
+    const rawEventDate = (body.eventDate ?? body.date) as string | undefined;
+    const hours = Number(body.hours ?? body.totalHours);
+    const guestCount = Number(body.guestCount);
+    const eventType = body.eventType as string | undefined;
+    const notes = body.notes as string | undefined;
+
+    if (!venueId || !rawEventDate || !Number.isFinite(hours) || !Number.isFinite(guestCount)) {
+        return NextResponse.json({ error: "Missing required booking fields" }, { status: 400 });
+    }
+
+    const parsedEventDate = new Date(rawEventDate);
+    if (Number.isNaN(parsedEventDate.getTime())) {
+        return NextResponse.json({ error: "Invalid event date" }, { status: 400 });
+    }
+
+    if (hours < 1) {
+        return NextResponse.json({ error: "Booking duration must be at least 1 hour" }, { status: 400 });
+    }
+
+    const bookingDayStart = new Date(parsedEventDate);
+    bookingDayStart.setHours(0, 0, 0, 0);
+    const bookingDayEnd = new Date(bookingDayStart.getTime() + 24 * 60 * 60 * 1000);
 
     const venue = await prisma.venue.findUnique({
         where: { id: venueId },
@@ -18,13 +40,51 @@ export async function POST(req: NextRequest) {
     });
     if (!venue) return NextResponse.json({ error: "Venue not found" }, { status: 404 });
 
+    if (!venue.isApproved || !venue.isActive) {
+        return NextResponse.json({ error: "Venue is not available for booking" }, { status: 400 });
+    }
+
+    if (hours < venue.minBookingHours) {
+        return NextResponse.json({ error: `Minimum booking duration is ${venue.minBookingHours} hour(s)` }, { status: 400 });
+    }
+
+    if (guestCount > venue.capacity) {
+        return NextResponse.json({ error: `Guest count cannot exceed venue capacity (${venue.capacity})` }, { status: 400 });
+    }
+
+    const [conflictingBooking, blockedDate] = await Promise.all([
+        prisma.booking.findFirst({
+            where: {
+                venueId,
+                status: { not: "CANCELLED" },
+                eventDate: { gte: bookingDayStart, lt: bookingDayEnd },
+            },
+            select: { id: true },
+        }),
+        prisma.venueBlockedDate.findFirst({
+            where: {
+                venueId,
+                date: { gte: bookingDayStart, lt: bookingDayEnd },
+            },
+            select: { id: true, reason: true },
+        }),
+    ]);
+
+    if (conflictingBooking) {
+        return NextResponse.json({ error: "This date is already booked. Please select another date." }, { status: 409 });
+    }
+
+    if (blockedDate) {
+        return NextResponse.json({ error: blockedDate.reason || "This date has been blocked by the venue owner." }, { status: 409 });
+    }
+
     const totalAmount = venue.pricePerHour * hours;
 
     const booking = await prisma.booking.create({
         data: {
             venueId,
             customerId: session.user!.id!,
-            eventDate: new Date(eventDate),
+            eventDate: parsedEventDate,
             hours,
             guestCount,
             eventType,

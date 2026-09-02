@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const {
         name, description, type, capacity, pricePerHour, minBookingHours,
         address, city, state, pincode, latitude, longitude,
-        images, amenities, highlights, isActive,
+        images, amenities, highlights, isActive, isApproved,
     } = body;
 
     const updated = await prisma.venue.update({
@@ -59,8 +59,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             amenities: amenities ?? [],
             highlights: highlights ?? [],
             isActive: isActive !== undefined ? isActive : true,
-            // Owner edits reset approval; admin keeps existing approval state
-            isApproved: role === "ADMIN" ? existing.isApproved : false,
+            // Owner edits reset approval; admin can set approval explicitly.
+            isApproved: role === "ADMIN"
+                ? (isApproved !== undefined ? Boolean(isApproved) : existing.isApproved)
+                : false,
         },
     });
 

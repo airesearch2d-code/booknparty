@@ -55,6 +55,7 @@ model User {
   bookings  Booking[]
   enquiries Enquiry[]
   reviews   Review[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Venue {
@@ -80,10 +81,22 @@ model Venue {
   ownerId         String
   owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   bookings        Booking[]
+  blockedDates    VenueBlockedDate[]
   enquiries       Enquiry[]
   reviews         Review[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+model VenueBlockedDate {
+  id        String   @id @default(cuid())
+  venueId   String
+  date      DateTime
+  reason    String?
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([venueId, date])
 }
 
 model Booking {
@@ -131,5 +144,14 @@ model Review {
   comment   String   @db.Text
   venue     Venue    @relation(fields: [venueId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }

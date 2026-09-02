@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Save, UserCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
+import AvatarUpload from "@/components/AvatarUpload";
 
 interface ProfileFormProps {
     initialUser: {
@@ -70,6 +71,12 @@ export default function ProfileForm({ initialUser, roleLabel }: ProfileFormProps
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+                <AvatarUpload
+                    currentAvatar={form.avatar || null}
+                    userName={form.name}
+                    onUploaded={(avatarUrl) => setForm((prev) => ({ ...prev, avatar: avatarUrl }))}
+                />
+
                 <div>
                     <label className="block text-sm text-white/70 mb-1.5">Full name</label>
                     <input
@@ -103,17 +110,6 @@ export default function ProfileForm({ initialUser, roleLabel }: ProfileFormProps
                         onChange={handleChange}
                         className="input-field"
                         placeholder="+91 98765 43210"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm text-white/70 mb-1.5">Avatar URL</label>
-                    <input
-                        name="avatar"
-                        value={form.avatar}
-                        onChange={handleChange}
-                        className="input-field"
-                        placeholder="https://example.com/avatar.jpg"
                     />
                 </div>
 

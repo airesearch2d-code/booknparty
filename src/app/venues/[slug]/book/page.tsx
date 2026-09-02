@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { Calendar, Clock, Users, CreditCard, ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 
 interface Venue {
     id: string;
@@ -29,6 +30,9 @@ export default function BookingPage() {
     const [venue, setVenue] = useState<Venue | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [availabilityLoading, setAvailabilityLoading] = useState(false);
+    const [availabilityMonth, setAvailabilityMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
     const [form, setForm] = useState({
         date: "",
         startTime: "09:00",
@@ -51,6 +55,23 @@ export default function BookingPage() {
             .finally(() => setLoading(false));
     }, [slug]);
 
+    useEffect(() => {
+        if (!venue) return;
+        const month = `${availabilityMonth.getFullYear()}-${String(availabilityMonth.getMonth() + 1).padStart(2, "0")}`;
+
+        setAvailabilityLoading(true);
+        fetch(`/api/venues/${venue.id}/availability?month=${month}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setUnavailableDates(Array.isArray(data.unavailableDates) ? data.unavailableDates : []);
+            })
+            .catch(() => {
+                setUnavailableDates([]);
+                toast.error("Unable to load availability for this month");
+            })
+            .finally(() => setAvailabilityLoading(false));
+    }, [venue, availabilityMonth]);
+
     const totalAmount = venue ? venue.pricePerHour * form.hours : 0;
     const gst = Math.round(totalAmount * 0.18);
     const grandTotal = totalAmount + gst;
@@ -58,23 +79,23 @@ export default function BookingPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!venue || !session?.user) return;
+
+        if (unavailableDates.includes(form.date)) {
+            toast.error("Selected date is unavailable. Please choose another date.");
+            return;
+        }
+
         setSubmitting(true);
 
         try {
-            const endHour = parseInt(form.startTime.split(":")[0]) + form.hours;
-            const endTime = `${String(endHour).padStart(2, "0")}:00`;
-
             const res = await fetch("/api/bookings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     venueId: venue.id,
-                    date: form.date,
-                    startTime: form.startTime,
-                    endTime,
-                    totalHours: form.hours,
+                    eventDate: form.date,
+                    hours: form.hours,
                     guestCount: form.guestCount,
-                    totalAmount: grandTotal,
                     notes: form.notes,
                 }),
             });
@@ -134,18 +155,23 @@ export default function BookingPage() {
                                 <h2 className="text-white font-semibold text-lg flex items-center gap-2">
                                     <Calendar size={18} className="text-purple-400" /> Date & Time
                                 </h2>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-white/70 text-sm mb-1.5">Event Date *</label>
-                                        <input
-                                            type="date"
-                                            className="input-field"
-                                            value={form.date}
-                                            min={new Date().toISOString().split("T")[0]}
-                                            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                                            required
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="block text-white/70 text-sm mb-2">Event Date *</label>
+                                    <AvailabilityCalendar
+                                        monthDate={availabilityMonth}
+                                        selectedDate={form.date}
+                                        unavailableDates={unavailableDates}
+                                        onMonthChange={setAvailabilityMonth}
+                                        onSelectDate={(isoDate) => setForm((f) => ({ ...f, date: isoDate }))}
+                                        loading={availabilityLoading}
+                                    />
+                                    {form.date && (
+                                        <p className="text-xs text-white/50 mt-3">
+                                            Selected date: <span className="text-white">{new Date(form.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
                                     <div>
                                         <label className="block text-white/70 text-sm mb-1.5">Start Time *</label>
                                         <input

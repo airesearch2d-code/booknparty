@@ -271,3 +271,26 @@ export async function sendWelcomeEmail(params: {
     `);
     await resend.emails.send({ from: FROM, to: params.userEmail, subject: "Welcome to BookNParty! 🎉", html });
 }
+
+  export async function sendPasswordResetEmail(params: {
+    userEmail: string;
+    userName: string;
+    resetToken: string;
+  }) {
+    if (!process.env.RESEND_API_KEY) return;
+
+    const resetUrl = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/reset-password?token=${params.resetToken}`;
+    const html = baseLayout("Reset Your Password", `
+      <p style="font-size:16px;margin-top:0;">Hi ${params.userName},</p>
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;line-height:1.6;">We received a request to reset your BookNParty password. Use the button below to set a new password.</p>
+      <a href="${resetUrl}" class="btn">Reset Password →</a>
+      <p style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:18px;line-height:1.6;">This link is valid for 1 hour. If you did not request this, you can ignore this email.</p>
+    `);
+
+    await resend.emails.send({
+      from: FROM,
+      to: params.userEmail,
+      subject: "BookNParty Password Reset",
+      html,
+    });
+  }
