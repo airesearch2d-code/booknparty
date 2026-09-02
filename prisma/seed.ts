@@ -344,36 +344,33 @@ async function main() {
     });
 
     if (!existingBooking) {
-        await (prisma.booking.createMany as any)({
-            data: [
-                {
-                    venueId: createdVenues[0].id,
-                    customerId: customer.id,
-                    date: new Date("2026-09-15"),
-                    startTime: "18:00",
-                    endTime: "22:00",
-                    totalHours: 4,
-                    guestCount: 150,
-                    totalAmount: 70800,
-                    status: "CONFIRMED",
-                    notes: "Birthday party for 150 guests. Need champagne tower setup.",
-                },
-                {
-                    venueId: createdVenues[2].id,
-                    customerId: customer.id,
-                    date: new Date("2026-10-08"),
-                    startTime: "20:00",
-                    endTime: "23:00",
-                    totalHours: 3,
-                    guestCount: 300,
-                    totalAmount: 70800,
-                    status: "PENDING",
-                    notes: "Mehndi function. Need traditional décor and folk music setup.",
-                },
-            ],
-        });
-        console.log("✅ 2 sample bookings seeded\n");
-    }
+  await (prisma.booking.createMany as any)({
+    data: [
+      {
+        venueId: createdVenues[0].id,
+        customerId: customer.id,
+        eventDate: new Date("2026-09-15T18:00:00.000Z"),
+        hours: 4,
+        guestCount: 150,
+        totalAmount: 70800,
+        status: "CONFIRMED",
+        notes: "Birthday party for 150 guests. Need champagne tower setup.",
+      },
+      {
+        venueId: createdVenues[2].id,
+        customerId: customer.id,
+        eventDate: new Date("2026-10-08T20:00:00.000Z"),
+        hours: 3,
+        guestCount: 300,
+        totalAmount: 70800,
+        status: "PENDING",
+        notes: "Mehndi function. Need traditional décor and folk music setup.",
+      },
+    ],
+  });
+
+  console.log("✅ 2 sample bookings seeded\n");
+}
 
     // ─── Sample Enquiries ─────────────────────────────────────────────────────
     const existingEnquiry = await prisma.enquiry.findFirst({

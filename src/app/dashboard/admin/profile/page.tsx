@@ -4,13 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import ProfileForm from "@/components/ProfileForm";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
+import DeleteAccountCard from "@/components/DeleteAccountCard";
 
 export default async function AdminProfilePage() {
     const session = await auth();
-    if (!session || (session.user as any).role !== "ADMIN") redirect("/login");
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (!session || role !== "ADMIN") redirect("/login");
+    if (!session.user?.id) redirect("/login");
 
     const user = await prisma.user.findUnique({
-        where: { id: session.user.id! },
+        where: { id: session.user.id },
         select: {
             id: true,
             name: true,
@@ -33,7 +36,10 @@ export default async function AdminProfilePage() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-[1.3fr_0.7fr] gap-8">
                     <ProfileForm initialUser={user} roleLabel="Admin" />
-                    <ChangePasswordForm />
+                    <div className="space-y-8">
+                        <ChangePasswordForm />
+                        <DeleteAccountCard roleLabel="Admin" />
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

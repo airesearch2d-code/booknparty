@@ -3,12 +3,43 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import Link from "next/link";
 
-export default async function AdminBookingsPage() {
+interface AdminBookingsPageProps {
+    searchParams: Promise<{ status?: string; q?: string }>;
+}
+
+type BookingStatusFilter = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+
+export default async function AdminBookingsPage({ searchParams }: AdminBookingsPageProps) {
     const session = await auth();
-    if (!session || (session.user as any).role !== "ADMIN") redirect("/login");
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (!session || role !== "ADMIN") redirect("/login");
+
+    const params = await searchParams;
+    const statusFilter = (params.status || "").toUpperCase();
+    const q = params.q || "";
+
+    const validStatuses: BookingStatusFilter[] = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"];
+    const typedStatus = validStatuses.includes(statusFilter as BookingStatusFilter)
+        ? (statusFilter as BookingStatusFilter)
+        : undefined;
+    const where = {
+        ...(typedStatus ? { status: typedStatus } : {}),
+        ...(q
+            ? {
+                OR: [
+                    { customer: { name: { contains: q, mode: "insensitive" as const } } },
+                    { customer: { email: { contains: q, mode: "insensitive" as const } } },
+                    { venue: { name: { contains: q, mode: "insensitive" as const } } },
+                    { venue: { city: { contains: q, mode: "insensitive" as const } } },
+                ],
+            }
+            : {}),
+    };
 
     const bookings = await prisma.booking.findMany({
+        where,
         include: {
             venue: { select: { name: true, city: true } },
             customer: { select: { name: true, email: true } },
@@ -34,6 +65,30 @@ export default async function AdminBookingsPage() {
                     <h1 className="text-3xl font-bold text-white">All Bookings</h1>
                     <p className="text-white/50 mt-1">Track bookings across all venues and customers</p>
                 </div>
+
+                <form className="glass-card rounded-2xl p-4 mb-6 grid grid-cols-1 md:grid-cols-[1fr_180px_auto_auto] gap-3">
+                    <input
+                        type="text"
+                        name="q"
+                        defaultValue={q}
+                        placeholder="Search customer, email, venue, city"
+                        className="input-field"
+                    />
+                    <select name="status" defaultValue={statusFilter} className="input-field">
+                        <option value="">All statuses</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="CONFIRMED">Confirmed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                    <button type="submit" className="btn-primary px-5 py-2.5 rounded-xl">Apply</button>
+                    <Link
+                        href={`/api/admin/bookings/export?status=${encodeURIComponent(statusFilter)}&q=${encodeURIComponent(q)}`}
+                        className="btn-secondary px-5 py-2.5 rounded-xl text-center"
+                    >
+                        Export CSV
+                    </Link>
+                </form>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div className="glass-card rounded-2xl p-5">
