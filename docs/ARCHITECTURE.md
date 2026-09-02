@@ -4,7 +4,7 @@
 
 BookNParty follows a modern **Next.js App Router** architecture with **Server Components** by default, **API Routes** for backend logic, and **Prisma ORM** for type-safe database access.
 
-**Latest implementation note (August 31, 2026):** the codebase now includes email automation, profile management APIs, and a platform settings screen in addition to the original booking, enquiry, venue, and review flows.
+**Latest implementation note (September 2, 2026):** the codebase now includes email automation, profile management APIs, and a platform settings screen in addition to the original booking, enquiry, venue, and review flows.
 
 ---
 
@@ -577,6 +577,6 @@ const venues = await prisma.venue.findMany({
 
 ---
 
-**Last Updated**: August 2026  
+**Last Updated**: September 2, 2026  
 **Architecture**: Next.js 16 App Router + Server Components  
 **Database**: PostgreSQL + Prisma 7

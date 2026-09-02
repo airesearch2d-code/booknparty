@@ -39,6 +39,8 @@ All protected endpoints require authentication via NextAuth session cookies. Use
 | `/api/enquiries`             | GET, POST        | Authenticated                        | List/create enquiries       |
 | `/api/enquiries/[id]`        | PATCH            | Owner/Admin                          | Respond to enquiry          |
 | `/api/reviews`               | GET, POST        | GET: Public, POST: Customer          | List/create reviews         |
+| `/api/user/profile`          | GET, PATCH       | Authenticated                        | Get/update current profile  |
+| `/api/user/change-password`  | POST             | Authenticated                        | Update account password     |
 
 ---
 
@@ -96,6 +98,27 @@ await signIn("credentials", {
 **Errors:**
 
 - `400`: Email already registered or validation failed
+
+---
+
+## Venue Endpoints
+
+## User Account Endpoints
+
+### GET /api/user/profile
+
+**Description**: Get current authenticated user profile  
+**Auth**: Required
+
+### PATCH /api/user/profile
+
+**Description**: Update current authenticated profile (name, email, phone, avatar)  
+**Auth**: Required
+
+### POST /api/user/change-password
+
+**Description**: Change user password with current-password verification  
+**Auth**: Required
 
 ---
 
@@ -674,7 +697,7 @@ All errors return JSON:
 
 ## Rate Limiting
 
-Currently no rate limiting implemented (planned for Phase 4).
+Currently no rate limiting implemented (planned for production hardening in Phase 5).
 
 ---
 
@@ -684,6 +707,6 @@ All API routes allow same-origin requests only. CORS not yet configured for exte
 
 ---
 
-**Last Updated**: August 2026  
+**Last Updated**: September 2, 2026  
 **API Version**: v1 (implicit)  
 **Base URL**: `/api`

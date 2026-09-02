@@ -258,7 +258,7 @@
 
 ## Not Included (Yet)
 
-### Testing (Planned for Phase 4)
+### Testing (Planned for Late Phase 4 / Phase 5)
 
 - No Jest/Vitest setup
 - No E2E testing (Playwright/Cypress)
@@ -274,7 +274,7 @@
 - No WebSockets (Socket.io)
 - No Server-Sent Events
 
-### Payment (Phase 4)
+### Payment (Phase 5)
 
 - Razorpay SDK integration pending
 
@@ -285,6 +285,6 @@
 
 ---
 
-**Last Updated**: August 2026  
+**Last Updated**: September 2, 2026  
 **Total Dependencies**: 26 production + 11 development  
 **Bundle Size**: Optimized with tree-shaking and code splitting
