@@ -48,6 +48,12 @@ CLOUDINARY_API_KEY="your-api-key"
 CLOUDINARY_API_SECRET="your-api-secret"
 ```
 
+If you use Supabase instead of local Postgres, choose the right connection string for your environment:
+
+- Use the direct `db.<project-ref>.supabase.co:5432` URL only when your machine can reach IPv6 or your Supabase project has the IPv4 add-on.
+- Use the `Session pooler` URL from Supabase `Connect` for local development on IPv4-only networks.
+- Avoid the `Transaction pooler` URL for this app runtime because the `pg` adapter uses prepared statements and long-lived pooled connections.
+
 **Generate AUTH_SECRET:**
 
 ```bash
