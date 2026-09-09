@@ -11,6 +11,7 @@ npm install
 # Create local environment variables
 copy NUL .env.local
 # Then fill in DATABASE_URL, AUTH_SECRET, RESEND_API_KEY, and related keys
+# If you use Supabase locally, prefer the Session pooler URL when your network cannot reach the IPv6-only direct host
 
 # Sync database schema
 npx prisma db push
@@ -117,6 +118,10 @@ npx prisma db push       # Sync schema to database
 npx prisma generate      # Regenerate Prisma Client
 npm run seed             # Seed test data
 ```
+
+## Database Connection Note
+
+If your local app shows `Can't reach database server at db.<project-ref>.supabase.co`, your `.env.local` is using Supabase's direct Postgres endpoint. That host is IPv6-only unless the project has the IPv4 add-on. For local development on typical IPv4-only networks, replace `DATABASE_URL` with the Supabase `Session pooler` connection string from the Supabase dashboard's `Connect` dialog.
 
 ## 🔑 Default Test Users
 
