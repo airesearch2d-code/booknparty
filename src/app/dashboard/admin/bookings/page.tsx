@@ -2,8 +2,9 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import AdminBookingsTable from "@/components/AdminBookingsTable";
 
 interface AdminBookingsPageProps {
     searchParams: Promise<{ status?: string; q?: string }>;
@@ -50,13 +51,6 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
     const totalRevenue = bookings
         .filter((booking) => booking.status === "CONFIRMED" || booking.status === "COMPLETED")
         .reduce((sum, booking) => sum + booking.totalAmount, 0);
-
-    const statusStyles: Record<string, string> = {
-        PENDING: "bg-yellow-500/20 text-yellow-300",
-        CONFIRMED: "bg-green-500/20 text-green-300",
-        CANCELLED: "bg-red-500/20 text-red-300",
-        COMPLETED: "bg-blue-500/20 text-blue-300",
-    };
 
     return (
         <DashboardLayout role="ADMIN">
@@ -105,40 +99,16 @@ export default async function AdminBookingsPage({ searchParams }: AdminBookingsP
                     </div>
                 </div>
 
-                <div className="glass-card rounded-2xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="border-b border-white/10">
-                                <tr className="text-left text-white/40 text-xs">
-                                    <th className="px-5 py-4">Customer</th>
-                                    <th className="px-5 py-4">Venue</th>
-                                    <th className="px-5 py-4">Event date</th>
-                                    <th className="px-5 py-4">Amount</th>
-                                    <th className="px-5 py-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {bookings.map((booking) => (
-                                    <tr key={booking.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-5 py-4">
-                                            <p className="text-white text-sm font-medium">{booking.customer.name}</p>
-                                            <p className="text-white/40 text-xs">{booking.customer.email}</p>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <p className="text-white text-sm font-medium">{booking.venue.name}</p>
-                                            <p className="text-white/40 text-xs">{booking.venue.city}</p>
-                                        </td>
-                                        <td className="px-5 py-4 text-white/60 text-sm">{formatDate(booking.eventDate)}</td>
-                                        <td className="px-5 py-4 text-white/60 text-sm">{formatCurrency(booking.totalAmount)}</td>
-                                        <td className="px-5 py-4">
-                                            <span className={`badge text-xs ${statusStyles[booking.status]}`}>{booking.status}</span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <AdminBookingsTable
+                    bookings={bookings.map((booking) => ({
+                        id: booking.id,
+                        status: booking.status,
+                        eventDate: booking.eventDate.toISOString(),
+                        totalAmount: booking.totalAmount,
+                        customer: booking.customer,
+                        venue: booking.venue,
+                    }))}
+                />
             </div>
         </DashboardLayout>
     );

@@ -2,8 +2,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import AdminEnquiriesTable from "@/components/AdminEnquiriesTable";
 
 interface AdminEnquiriesPageProps {
     searchParams: Promise<{ status?: string; q?: string }>;
@@ -47,12 +47,6 @@ export default async function AdminEnquiriesPage({ searchParams }: AdminEnquirie
         orderBy: { createdAt: "desc" },
     });
 
-    const statusStyles: Record<string, string> = {
-        PENDING: "bg-yellow-500/20 text-yellow-300",
-        RESPONDED: "bg-green-500/20 text-green-300",
-        CLOSED: "bg-slate-500/20 text-slate-300",
-    };
-
     return (
         <DashboardLayout role="ADMIN">
             <div className="max-w-7xl">
@@ -84,41 +78,18 @@ export default async function AdminEnquiriesPage({ searchParams }: AdminEnquirie
                     </Link>
                 </form>
 
-                <div className="glass-card rounded-2xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="border-b border-white/10">
-                                <tr className="text-left text-white/40 text-xs">
-                                    <th className="px-5 py-4">Customer</th>
-                                    <th className="px-5 py-4">Venue</th>
-                                    <th className="px-5 py-4">Event type</th>
-                                    <th className="px-5 py-4">Date</th>
-                                    <th className="px-5 py-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {enquiries.map((enquiry) => (
-                                    <tr key={enquiry.id} className="hover:bg-white/5 transition-colors align-top">
-                                        <td className="px-5 py-4">
-                                            <p className="text-white text-sm font-medium">{enquiry.name}</p>
-                                            <p className="text-white/40 text-xs">{enquiry.email}</p>
-                                            <p className="text-white/30 text-[11px] mt-1">{enquiry.phone}</p>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <p className="text-white text-sm font-medium">{enquiry.venue.name}</p>
-                                            <p className="text-white/40 text-xs">{enquiry.venue.city}</p>
-                                        </td>
-                                        <td className="px-5 py-4 text-white/60 text-sm">{enquiry.eventType || "—"}</td>
-                                        <td className="px-5 py-4 text-white/60 text-sm">{enquiry.eventDate ? formatDate(enquiry.eventDate) : "Not provided"}</td>
-                                        <td className="px-5 py-4">
-                                            <span className={`badge text-xs ${statusStyles[enquiry.status]}`}>{enquiry.status}</span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <AdminEnquiriesTable
+                    enquiries={enquiries.map((enquiry) => ({
+                        id: enquiry.id,
+                        status: enquiry.status,
+                        eventType: enquiry.eventType,
+                        eventDate: enquiry.eventDate ? enquiry.eventDate.toISOString() : null,
+                        name: enquiry.name,
+                        email: enquiry.email,
+                        phone: enquiry.phone,
+                        venue: enquiry.venue,
+                    }))}
+                />
             </div>
         </DashboardLayout>
     );

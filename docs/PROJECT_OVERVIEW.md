@@ -86,46 +86,56 @@ Create a seamless experience for discovering, booking, and managing event venues
 
 **Status**: Technical implementation 100% complete. Browser testing optional.
 
-### 🔄 Phase 4: UX & Communication (In Progress)
+### ✅ Phase 4: UX & Communication (Complete)
 
-**Implementation status (September 2, 2026):**
+**Implementation status (September 25, 2026):**
 
-**Completed in the current codebase:**
-
-- ✅ Email notifications for bookings, enquiries, venue approvals, and welcome messages via Resend
+- ✅ Email notifications for bookings, enquiries, venue approvals, cancellations, modification requests, and welcome messages via Resend
 - ✅ Role-based profile management pages for customer, owner, and admin accounts
 - ✅ Password change workflow and profile editing
 - ✅ Admin settings dashboard with moderation toggles
+- ✅ Venue availability calendar and owner date-blocking logic
+- ✅ Booking conflict detection and double-booking prevention
+- ✅ Password recovery flow with expiring reset tokens
+- ✅ Customer booking cancellation and invoice generation
+- ✅ Booking modification (reschedule) workflow with owner/admin approval
+- ✅ Admin export and bulk actions for bookings and enquiries
+- ✅ Testing baseline (Vitest) and error monitoring scaffold (Sentry, via native instrumentation)
 
-**Still pending:**
+### 🔜 Phase 5: Content Management (Planned - 1-2 weeks)
 
-- ⏳ Venue availability calendar and blocking logic
-- ⏳ Advanced conflict detection and double-booking checks
-- ⏳ Additional admin reporting/export features
-- ⏳ Final QA and polish pass
+**Scope**: Admin-manageable static pages, blog, and contact form
 
-### 🔜 Phase 5: Payment & Scale (Planned - 2-3 weeks)
+- Admin CRUD for static pages (About, Contact, Privacy, Terms) with Markdown content
+- Blog CRUD (posts, featured images via Cloudinary, publish/draft)
+- Working contact form with `ContactSubmission` storage and admin email notification (via Resend)
+- Public routes: `/about`, `/privacy`, `/terms`, `/contact`, `/blog`, `/blog/[slug]` — replacing currently dead Footer links
+
+See [PHASE_5_ROADMAP.md](PHASE_5_ROADMAP.md) for full details.
+
+### 🔜 Phase 6: Payment & Scale (Planned - 2-3 weeks)
 
 **Critical**: Payment Integration
 
 - Razorpay payment gateway integration
 - Automated booking confirmation on payment
-- Invoice generation and email delivery
+- Payment details on invoices
 
 **Production Readiness**:
 
-- Error tracking and monitoring (Sentry)
 - Security hardening and rate limiting
 - Performance optimizations
 - Caching strategies
+- Activating the Sentry scaffold with a real DSN and alerting
 
 **Advanced Features**:
 
-- Booking modification requests
 - Advanced analytics dashboard
-- Automated testing suite
+- Expanded automated test coverage (integration/E2E)
 
-**Prerequisites**: Razorpay account, Phase 4 completion
+**Prerequisites**: Razorpay account
+
+See [PHASE_6_ROADMAP.md](PHASE_6_ROADMAP.md) for full details.
 
 ## Project Goals
 
@@ -153,16 +163,18 @@ Create a seamless experience for discovering, booking, and managing event venues
 - ⏳ Payment integration (pending Phase 5)
 - ✅ Email notifications (implemented)
 
-## Current State (September 2, 2026)
+## Current State (September 25, 2026)
 
-Phase 4 is **actively in execution** with core communication and profile improvements already delivered. The platform supports:
+Phase 4 is **complete**. The platform supports:
 
-- Full venue management workflow
-- Complete booking lifecycle (minus payments)
-- Enquiry communication
+- Full venue management workflow, including availability calendar and block-dates
+- Complete booking lifecycle (create, confirm/cancel, reschedule with approval — minus payments)
+- Enquiry communication with admin bulk actions
 - Review system with validation
 - Advanced search and filtering
 - Revenue tracking
+- Password recovery, invoice generation, and admin export tooling
+- Vitest testing baseline and a Sentry monitoring scaffold
 
 **Ready for**: Beta testing, demo deployments, further feature development  
 **Not ready for**: Production with real transactions (requires Phase 5 payment integration)
@@ -187,6 +199,6 @@ Phase 4 is **actively in execution** with core communication and profile improve
 
 ---
 
-**Last Updated**: September 2, 2026  
-**Phase**: 4 (Execution)  
-**Status**: In Progress (pending availability and payment milestones)
+**Last Updated**: September 25, 2026  
+**Phase**: 4 (Complete)  
+**Status**: Phase 5 (payment integration) not started
