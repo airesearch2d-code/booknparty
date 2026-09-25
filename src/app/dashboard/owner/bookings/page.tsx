@@ -5,6 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import OwnerBookingActions from "@/components/OwnerBookingActions";
+import OwnerModificationRequestActions from "@/components/OwnerModificationRequestActions";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
     PENDING: { label: "Pending", color: "bg-yellow-500/20 text-yellow-300" },
@@ -24,6 +25,7 @@ export default async function OwnerBookingsPage() {
         include: {
             venue: { select: { name: true, city: true } },
             customer: { select: { name: true, email: true, phone: true } },
+            modificationRequests: { where: { status: "PENDING" } },
         },
         orderBy: { createdAt: "desc" },
     });
@@ -96,6 +98,18 @@ export default async function OwnerBookingsPage() {
                                             <OwnerBookingActions bookingId={booking.id} />
                                         )}
                                     </div>
+
+                                    {booking.modificationRequests.map((request) => (
+                                        <OwnerModificationRequestActions
+                                            key={request.id}
+                                            bookingId={booking.id}
+                                            requestId={request.id}
+                                            requestedEventDate={request.requestedEventDate.toISOString()}
+                                            requestedHours={request.requestedHours}
+                                            requestedGuestCount={request.requestedGuestCount}
+                                            reason={request.reason}
+                                        />
+                                    ))}
                                 </div>
                             );
                         })}

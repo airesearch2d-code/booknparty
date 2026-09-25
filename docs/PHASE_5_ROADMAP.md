@@ -2,571 +2,265 @@
 
 ## Overview
 
-Phase 5 remains the production-scale and payment phase. It is intentionally deferred until the remaining Phase 4 items—calendar availability, admin polish, and final QA—are closed out.
+Phase 5 introduces an admin-managed content system (a lightweight CMS) so the platform's static and editorial pages no longer need code changes to update. Phase 4 is complete (see [PHASE_4_ROADMAP.md](PHASE_4_ROADMAP.md)). Payment integration and further production hardening (previously scoped as "Phase 5") has been renumbered to **Phase 6** (see [PHASE_6_ROADMAP.md](PHASE_6_ROADMAP.md)) to make room for this content-management work.
+
+**Scope**: Admin-manageable **About Us**, **Contact**, **Privacy Policy**, and **Terms of Service** static pages, plus a full **Blog** (list + post CRUD), and a working **Contact form** that notifies the admin by email. All five are already linked from the site [Footer](../src/components/Footer.tsx) (`/about`, `/blog`, `/contact`, `/privacy`, `/terms`) but the routes don't exist yet.
 
 **Current Status**: Not started  
-**Target Start**: After Phase 4 completion and final build verification  
-**Estimated Duration**: 2-3 weeks  
-**Priority**: Critical (required for real transactions)
+**Target Start**: Now (Phase 4 complete)  
+**Estimated Duration**: 1-2 weeks  
+**Priority**: High (footer links are currently dead; also unblocks marketing/SEO content updates without a code deploy)
+
+---
+
+## Key Decisions
+
+- **Content format**: Markdown, authored via a plain textarea with a live preview pane (rendered with `react-markdown` + `remark-gfm`). No WYSIWYG editor (e.g. TipTap) — keeps dependencies and integration work minimal, consistent with the rest of the admin UI (plain `useState` forms, no rich editors anywhere else in the codebase).
+- **Contact page**: Content (address/hours/etc., admin-edited) **plus** a working contact form. Submissions are stored in a `ContactSubmission` table and trigger an admin notification email via the existing Resend integration.
+- **Blog**: Flat list of posts — no categories/tags in this phase (can be added later without breaking changes).
+- **Core page slugs are protected**: `about`, `contact`, `privacy`, `terms` are seeded on setup and cannot be renamed or deleted via the admin UI/API, to guarantee the Footer links never 404. Admins can still create additional custom pages beyond these four.
+
+---
+
+## Architecture Summary
+
+### Database (Prisma)
+
+Three new models, following existing schema conventions (`String @id @default(cuid())`, `createdAt`/`updatedAt`, `@db.Text` for long content):
+
+- **`Page`** — `slug` (unique), `title`, `content` (markdown), `metaDescription`, `isPublished`, `updatedBy` relation → `User`. Used for About/Contact/Privacy/Terms and any future static pages.
+- **`BlogPost`** — `title`, `slug` (unique), `excerpt`, `content` (markdown), `featuredImage` (Cloudinary URL), `isPublished`, `publishedAt`, `author` relation → `User`.
+- **`ContactSubmission`** — `name`, `email`, `phone`, `message`, `isRead`.
+
+`User` gains back-relations: `pages Page[]`, `blogPosts BlogPost[]`.
+
+### Public Routes (Server Components, Prisma queried directly — no self-API calls)
+
+- `/about`, `/privacy`, `/terms` — fetch `Page` by fixed slug, `notFound()` if missing/unpublished, `generateMetadata()` from title/metaDescription, rendered via a shared `MarkdownContent` component.
+- `/contact` — same `Page` pattern for slug `contact`, plus a `<ContactForm />` client component below the content.
+- `/blog` — paginated grid of published posts (featured image, title, excerpt, publish date), same pagination pattern as `/venues`.
+- `/blog/[slug]` — full post detail, published-only, `generateMetadata()`, markdown rendering.
+
+### Admin Routes (ADMIN role only, mirrors the Venues CRUD pattern)
+
+- `/dashboard/admin/pages` — list, `/pages/[id]/edit`, `/pages/new` (for extra custom pages).
+- `/dashboard/admin/blog` — list, `/blog/[id]/edit`, `/blog/new` (title/excerpt/content/featured image/publish toggle).
+- `/dashboard/admin/contact-submissions` — list submissions, mark read, delete.
+- New nav items in `DashboardLayout`'s `navItems.ADMIN`: **Pages**, **Blog**, **Messages**.
+
+### API Routes
+
+- `GET/POST /api/pages`, `GET/PUT/DELETE /api/pages/[id]` (admin only; DELETE blocked for the 4 core slugs).
+- `GET/POST /api/blog` (GET public for published posts, paginated), `GET/PUT/DELETE /api/blog/[id]` (admin only).
+- `POST /api/blog/upload-image` — Cloudinary featured-image upload (folder `booknparty/blog`), mirrors the existing avatar upload endpoint.
+- `POST /api/contact` (public, zod-validated, creates `ContactSubmission` + sends admin notification email), `GET /api/contact` (admin list), `PATCH/DELETE /api/contact/[id]` (admin).
+
+### Email
+
+- New `sendContactFormSubmission(name, email, phone, message)` in `src/lib/email.ts`, following the existing `baseLayout()` template pattern, guarded by `RESEND_API_KEY` (no-op if unset) and sent to a new `CONTACT_NOTIFICATION_EMAIL` env var.
+
+### New Dependency
+
+- `react-markdown` + `remark-gfm` (no markdown/rich-text library currently installed).
 
 ---
 
 ## Phase 5 Goals
 
-1. **Enable Real Transactions**: Integrate Razorpay payment gateway
-2. **Prepare for Scale**: Add monitoring, error tracking, analytics
-3. **Optimize Performance**: Improve loading times and responsiveness
-4. **Advanced Features**: Booking modifications, advanced analytics
-5. **Production Readiness**: Security hardening, final testing
+1. Replace the five dead Footer links (`/about`, `/blog`, `/contact`, `/privacy`, `/terms`) with real, admin-editable pages
+2. Let admins update marketing/legal copy without a code deploy
+3. Ship a simple blog the admin can publish posts to
+4. Capture contact-form leads with an email notification to the admin
+5. Keep scope minimal: Markdown content, no WYSIWYG editor, no blog categories/tags in this phase
 
 ---
 
-## 🔴 Priority 1: Payment Integration (CRITICAL)
+## 🔴 Priority 1: Data Layer
 
-### Feature: Razorpay Payment Gateway
-
-**Status**: Not Started  
-**Estimated Effort**: 2-3 hours  
-**Priority**: P0 (Highest)  
-**Blocker**: Requires Razorpay account setup
-
-**Description:**  
-Integrate Razorpay for secure online payments. Booking flow changes from manual confirmation to payment-first workflow with automatic confirmation.
-
-### Current vs Future Flow
-
-**Current (Phase 4)**:
-
-```
-Customer submits booking → Status: PENDING → Owner confirms manually → CONFIRMED
-```
-
-**Future (Phase 5)**:
-
-```
-Customer pays via Razorpay → Status: CONFIRMED (automatic) → Owner manages
-```
-
-### Requirements
-
-#### 1. Setup & Prerequisites
-
-- Create Razorpay account at https://razorpay.com/
-- Start with test mode (free)
-- Get test credentials from dashboard
-- Install SDK: `npm install razorpay`
-
-**Environment Variables:**
-
-```env
-# Razorpay Credentials (Test Mode)
-RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-
-# For Production (later)
-RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxx
-```
-
-#### 2. Backend Implementation
-
-**Create Order Endpoint:**
-
-File: `src/app/api/payments/create-order/route.ts`
-
-```typescript
-import { NextRequest, NextResponse } from "next/server";
-import Razorpay from "razorpay";
-import { auth } from "@/lib/auth";
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
-
-export async function POST(req: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { amount, currency = "INR", bookingId } = await req.json();
-
-    const order = await razorpay.orders.create({
-      amount: amount * 100, // Razorpay expects amount in paise
-      currency,
-      receipt: `booking_${bookingId}`,
-    });
-
-    return NextResponse.json({
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-    });
-  } catch (error) {
-    console.error("Payment order creation failed:", error);
-    return NextResponse.json(
-      { error: "Failed to create payment order" },
-      { status: 500 },
-    );
-  }
-}
-```
-
-**Verify Payment Endpoint:**
-
-File: `src/app/api/payments/verify/route.ts`
-
-```typescript
-import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-
-export async function POST(req: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { orderId, paymentId, signature, bookingId } = await req.json();
-
-    // Verify signature
-    const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-      .update(`${orderId}|${paymentId}`)
-      .digest("hex");
-
-    if (generatedSignature !== signature) {
-      return NextResponse.json(
-        { error: "Invalid payment signature" },
-        { status: 400 },
-      );
-    }
-
-    // Update booking with payment info
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        status: "CONFIRMED",
-        paymentId: paymentId,
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: "Payment verified successfully",
-    });
-  } catch (error) {
-    console.error("Payment verification failed:", error);
-    return NextResponse.json(
-      { error: "Payment verification failed" },
-      { status: 500 },
-    );
-  }
-}
-```
-
-#### 3. Frontend Integration
-
-**Modify Booking Page:**
-
-File: `src/app/venues/[slug]/book/page.tsx`
-
-Changes needed:
-
-1. Load Razorpay script in page head
-2. Create booking first (status: PENDING)
-3. Create Razorpay order
-4. Open Razorpay checkout
-5. On success, verify payment
-6. Update booking to CONFIRMED
-
-**Example Integration:**
-
-```typescript
-"use client";
-
-import Script from "next/script";
-import { useState } from "react";
-
-export default function BookingPage() {
-  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
-
-  const handlePayment = async (bookingData) => {
-    // Step 1: Create booking
-    const bookingRes = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingData),
-    });
-    const booking = await bookingRes.json();
-
-    // Step 2: Create payment order
-    const orderRes = await fetch("/api/payments/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: booking.totalAmount,
-        bookingId: booking.id,
-      }),
-    });
-    const order = await orderRes.json();
-
-    // Step 3: Open Razorpay checkout
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: order.amount,
-      currency: order.currency,
-      order_id: order.orderId,
-      name: "BookNParty",
-      description: `Booking for ${booking.venue.name}`,
-      handler: async (response) => {
-        // Step 4: Verify payment
-        await fetch("/api/payments/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: response.razorpay_order_id,
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature,
-            bookingId: booking.id,
-          }),
-        });
-
-        // Redirect to success page
-        router.push("/dashboard/customer/bookings?success=true");
-      },
-      prefill: {
-        name: session.user.name,
-        email: session.user.email,
-      },
-    };
-
-    const razorpay = new window.Razorpay(options);
-    razorpay.open();
-  };
-
-  return (
-    <>
-      <Script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        onLoad={() => setRazorpayLoaded(true)}
-      />
-      {/* Booking form */}
-    </>
-  );
-}
-```
-
-#### 4. Testing
-
-**Test Cards:**
-
-- Success: `4111 1111 1111 1111`
-- CVV: Any 3 digits
-- Expiry: Any future date
-- OTP: `000000`
-
-**Test Scenarios:**
-
-- [ ] Successful payment
-- [ ] Payment failure
-- [ ] User cancels payment
-- [ ] Network error during payment
-- [ ] Signature verification failure
-- [ ] Booking status updates correctly
-- [ ] Payment ID stored in database
-
-### Files to Create
-
-- `src/app/api/payments/create-order/route.ts`
-- `src/app/api/payments/verify/route.ts`
-
-### Files to Modify
-
-- `src/app/venues/[slug]/book/page.tsx`
-- `src/app/api/bookings/route.ts` (optional status handling)
-
-### Acceptance Criteria
-
-- ✅ Razorpay checkout opens on booking submission
-- ✅ Payment success triggers CONFIRMED status
-- ✅ Payment failure shows error message
-- ✅ Booking records payment ID
-- ✅ Test mode works with test cards
-- ✅ Email sent after successful payment
-- ✅ Invoice generated with payment details
-
----
-
-## 🟠 Priority 2: Production Readiness
-
-### Feature: Error Tracking & Monitoring
+### Feature: Prisma Models — `Page`, `BlogPost`, `ContactSubmission`
 
 **Status**: Not Started  
-**Estimated Effort**: 2-3 hours  
-**Priority**: P1 (High)
+**Estimated Effort**: 1-2 hours  
+**Priority**: P0 (blocks everything else)
 
-**Tools to Integrate:**
+**Schema additions** (`prisma/schema.prisma`), following existing conventions:
 
-1. **Sentry** - Error tracking
-   - Frontend and backend error tracking
-   - Performance monitoring
-   - User session replay
+```prisma
+model Page {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  content         String   @db.Text
+  metaDescription String?
+  isPublished     Boolean  @default(true)
+  updatedBy       User?    @relation(fields: [updatedById], references: [id])
+  updatedById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
-2. **Vercel Analytics** - Performance metrics
-   - Real User Monitoring (RUM)
-   - Web Vitals tracking
-   - Geographic distribution
+model BlogPost {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  excerpt       String?
+  content       String    @db.Text
+  featuredImage String?
+  isPublished   Boolean   @default(false)
+  publishedAt   DateTime?
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
 
-3. **PostHog** - Product analytics (optional)
-   - User behavior tracking
-   - Feature usage analytics
-   - Conversion funnels
-
-**Implementation:**
-
-```bash
-npm install @sentry/nextjs
-npx @sentry/wizard -i nextjs
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
 ```
 
-**Environment Variables:**
+Add to `User`: `pages Page[]`, `blogPosts BlogPost[]`.
 
-```env
-SENTRY_AUTH_TOKEN=xxxxxxxxxxxx
-NEXT_PUBLIC_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
-```
+**Tasks:**
+
+- [ ] Add the three models + `User` back-relations to `prisma/schema.prisma`
+- [ ] `npx prisma db push` then `npx prisma generate` (both required — see repo memory notes)
+- [ ] Extend `prisma/seed.ts` to upsert the 4 core `Page` rows (`about`, `contact`, `privacy`, `terms`) with placeholder markdown content, plus one sample published `BlogPost`
+- [ ] `npm install react-markdown remark-gfm`
 
 **Acceptance Criteria:**
 
-- ✅ Errors logged to Sentry
-- ✅ Performance metrics tracked
-- ✅ Source maps uploaded
-- ✅ Alerts configured
+- [ ] `npm run seed` populates all 4 core pages without error
+- [ ] `npx prisma generate` produces working types for `prisma.page`, `prisma.blogPost`, `prisma.contactSubmission`
 
 ---
 
-### Feature: Security Hardening
+## 🟠 Priority 2: Admin CRUD — Pages & Blog
 
-**Status**: Partially Complete  
-**Estimated Effort**: 2-3 hours  
-**Priority**: P1 (High)
-
-**Security Checklist:**
-
-- [ ] Enable HTTPS only (production)
-- [ ] Add rate limiting to API routes
-- [ ] Implement CSRF protection
-- [ ] Add input sanitization
-- [ ] Enable Content Security Policy
-- [ ] Add API request logging
-- [ ] Implement brute force protection on login
-- [ ] Add payment webhook signature verification
-- [ ] Secure environment variables
-- [ ] Add database query timeouts
-
-**Libraries:**
-
-```bash
-npm install express-rate-limit helmet
-```
-
----
-
-## 🟡 Priority 3: Performance Optimizations
-
-### Feature: Caching & Data Fetching
+### Feature: Admin Page Management
 
 **Status**: Not Started  
 **Estimated Effort**: 3-4 hours  
-**Priority**: P2 (Medium)
+**Priority**: P1
 
-**Optimizations:**
+**Files to Create:**
 
-1. **React Query / SWR** - Client-side caching
-2. **ISR (Incremental Static Regeneration)** - For venue pages
-3. **Edge Caching** - For API responses
-4. **Database Query Optimization** - Add indexes
-5. **Image Optimization** - WebP format, lazy loading
-6. **Code Splitting** - Dynamic imports
-
-**Database Indexes:**
-
-```prisma
-model Venue {
-  @@index([city, type, isApproved])
-  @@index([slug])
-  @@index([ownerId])
-}
-
-model Booking {
-  @@index([customerId, status])
-  @@index([venueId, eventDate])
-}
-```
+- `src/app/api/pages/route.ts` — GET (admin: list all), POST (admin: create, zod-validated slug)
+- `src/app/api/pages/[id]/route.ts` — GET/PUT/DELETE (admin only; DELETE rejected for the 4 core slugs)
+- `src/app/dashboard/admin/pages/page.tsx` — list view (title, slug, published badge, updated date)
+- `src/app/dashboard/admin/pages/[id]/edit/page.tsx` and `.../pages/new/page.tsx`
+- `src/components/EditPageForm.tsx` — title, slug (locked for core pages), markdown textarea + preview toggle, metaDescription, isPublished checkbox
+- `src/components/MarkdownContent.tsx` — shared `react-markdown` + `remark-gfm` renderer, used by both the admin preview and all public pages
 
 **Acceptance Criteria:**
 
-- ✅ Venue list page loads < 1 second
-- ✅ API responses cached appropriately
-- ✅ Images optimized and lazy-loaded
-- ✅ Lighthouse score > 90
+- [ ] Admin can edit About/Contact/Privacy/Terms content and see it reflected on the public route immediately
+- [ ] Admin can create an additional custom page (e.g. `/faq`) via "New Page"
+- [ ] Attempting to delete a core page (about/contact/privacy/terms) is blocked with a clear error
 
----
-
-## 🟡 Priority 3: Advanced Features
-
-### Feature: Booking Modifications
+### Feature: Admin Blog Management
 
 **Status**: Not Started  
 **Estimated Effort**: 4-5 hours  
-**Priority**: P2 (Medium)
+**Priority**: P1
 
-**Description:**  
-Allow customers to request booking changes (date, time, guest count) with owner approval.
+**Files to Create:**
 
-**Flow:**
+- `src/app/api/blog/route.ts` — GET (public: published only, paginated like `/api/venues`), POST (admin create, slug via `generateSlug(title)`)
+- `src/app/api/blog/[id]/route.ts` — GET/PUT/DELETE (admin only)
+- `src/app/api/blog/upload-image/route.ts` — Cloudinary featured-image upload (folder `booknparty/blog`), mirrors `upload-avatar/route.ts`
+- `src/app/dashboard/admin/blog/page.tsx` — list posts (title, draft/published badge, publishedAt)
+- `src/components/AddBlogPostForm.tsx` / `src/components/EditBlogPostForm.tsx` — title, excerpt, markdown content + preview, featured image upload, isPublished toggle
+- `src/app/dashboard/admin/blog/new/page.tsx` and `.../blog/[id]/edit/page.tsx`
 
-1. Customer requests modification
-2. Owner reviews request
-3. If date changes, check availability
-4. If price changes, calculate refund/additional payment
-5. Owner approves/rejects
-6. If approved and payment needed, trigger Razorpay
+**Acceptance Criteria:**
 
-**Database Changes:**
-
-```prisma
-model BookingModification {
-  id              String   @id @default(cuid())
-  bookingId       String
-  requestedBy     String
-  originalDate    DateTime
-  newDate         DateTime?
-  originalGuests  Int
-  newGuests       Int?
-  reason          String?
-  status          String   // PENDING, APPROVED, REJECTED
-  priceAdjustment Float?
-  approvedBy      String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  booking         Booking  @relation(fields: [bookingId], references: [id])
-  requester       User     @relation(fields: [requestedBy], references: [id])
-}
-```
+- [ ] Admin can create, edit, publish/unpublish, and delete blog posts
+- [ ] Featured image uploads to Cloudinary and displays on the blog list/detail pages
+- [ ] Draft posts are not visible on the public `/blog` routes
 
 ---
 
-### Feature: Advanced Analytics Dashboard
+## 🟡 Priority 3: Contact Form
 
-**Status**: Basic stats only  
-**Estimated Effort**: 6-8 hours  
-**Priority**: P2 (Medium)
+### Feature: Contact Form + Submissions Inbox
 
-**Features:**
+**Status**: Not Started  
+**Estimated Effort**: 2-3 hours  
+**Priority**: P2
 
-- Revenue charts (daily, weekly, monthly)
-- Booking trends over time
-- Conversion rate tracking
-- Top venues by revenue
-- Customer lifetime value
-- Booking cancellation rates
-- Peak booking times
+**Files to Create:**
 
-**Libraries:**
+- `src/lib/email.ts` — add `sendContactFormSubmission(name, email, phone, message)`, guarded by `RESEND_API_KEY`, sent to a new `CONTACT_NOTIFICATION_EMAIL` env var
+- `src/app/api/contact/route.ts` — POST (public, zod-validated name/email/message; creates `ContactSubmission` + sends email), GET (admin: list)
+- `src/app/api/contact/[id]/route.ts` — PATCH (admin: mark read), DELETE (admin)
+- `src/components/ContactForm.tsx` — client form, posts to `/api/contact`, toast feedback
+- `src/app/dashboard/admin/contact-submissions/page.tsx` — list with unread indicator, mark-read/delete actions
 
-```bash
-npm install recharts date-fns
+**Environment Variables:**
+
+```env
+CONTACT_NOTIFICATION_EMAIL=   # Admin inbox address for contact form notifications
 ```
+
+**Acceptance Criteria:**
+
+- [ ] Submitting the contact form creates a `ContactSubmission` row
+- [ ] If `RESEND_API_KEY` and `CONTACT_NOTIFICATION_EMAIL` are set, an email is sent to the admin
+- [ ] Admin can view, mark as read, and delete submissions
 
 ---
 
-### Feature: Automated Invoice Generation
+## 🟢 Priority 4: Public Pages & Navigation
+
+### Feature: Public Static Pages, Blog, Contact
 
 **Status**: Not Started  
 **Estimated Effort**: 3-4 hours  
-**Priority**: P3 (Low-Medium)
+**Priority**: P2
 
-**Description:**  
-Generate PDF invoices automatically after payment confirmation.
+**Files to Create:**
 
-**Libraries:**
+- `src/app/about/page.tsx`, `src/app/privacy/page.tsx`, `src/app/terms/page.tsx` — fetch `Page` by fixed slug via Prisma, `notFound()` if missing/unpublished, `generateMetadata()`, render via `MarkdownContent`
+- `src/app/contact/page.tsx` — same pattern for slug `contact`, plus `<ContactForm />`
+- `src/app/blog/page.tsx` — paginated grid of published posts (mirrors `/venues` pagination)
+- `src/app/blog/[slug]/page.tsx` — full post detail, published-only, `generateMetadata()`
 
-```bash
-npm install @react-pdf/renderer
-```
+**Files to Modify:**
 
-**Features:**
+- `src/components/DashboardLayout.tsx` — add **Pages**, **Blog**, **Messages** to `navItems.ADMIN`
 
-- GST calculation (if applicable)
-- Company details
-- Booking details breakdown
-- Payment method and ID
-- Download and email options
+**Acceptance Criteria:**
 
----
-
-## 🟢 Priority 4: Testing & Quality
-
-### Feature: Automated Testing
-
-**Status**: Not Started  
-**Estimated Effort**: 8-10 hours  
-**Priority**: P3 (Nice to have)
-
-**Testing Stack:**
-
-1. **Unit Tests** - Jest + React Testing Library
-2. **Integration Tests** - API route testing
-3. **E2E Tests** - Playwright
-4. **Visual Regression** - Percy or Chromatic
-
-**Setup:**
-
-```bash
-npm install -D jest @testing-library/react @testing-library/jest-dom
-npm install -D @playwright/test
-```
-
-**Critical Tests:**
-
-- Authentication flows
-- Booking creation and payment
-- Admin venue approval
-- Email notification triggers
-- Payment webhook handling
+- [ ] All 5 Footer links (`/about`, `/blog`, `/contact`, `/privacy`, `/terms`) resolve without 404s
+- [ ] `/blog/[slug]` renders markdown content correctly (headings, lists, links, tables via `remark-gfm`)
+- [ ] Admin sidebar shows the 3 new nav items
 
 ---
 
 ## Phase 5 Sprint Plan
 
-### Sprint 1 (Week 1): Payment Integration
+### Sprint 1 (Days 1-3): Data Layer + Admin Pages CRUD
 
-- **Day 1**: Razorpay account setup and credentials
-- **Day 2**: Backend payment endpoints
-- **Day 3**: Frontend Razorpay integration
-- **Day 4**: Testing and error handling
-- **Day 5**: Invoice generation
+- Day 1: Schema, migration, seed, install markdown deps
+- Day 2-3: Pages API + admin UI + `MarkdownContent` shared renderer
 
-### Sprint 2 (Week 2): Production Readiness
+### Sprint 2 (Days 4-6): Admin Blog CRUD
 
-- **Days 1-2**: Error tracking and monitoring
-- **Days 3-4**: Security hardening
-- **Day 5**: Performance optimizations
+- Day 4-5: Blog API + admin UI + Cloudinary featured-image upload
+- Day 6: Polish, edge cases (duplicate slugs, empty states)
 
-### Sprint 3 (Week 3): Advanced Features & Testing
+### Sprint 3 (Days 7-9): Contact Form + Public Pages
 
-- **Days 1-2**: Booking modifications (optional)
-- **Days 3-4**: Advanced analytics (optional)
-- **Day 5**: Final testing and documentation
+- Day 7: Contact form, email, submissions inbox
+- Day 8: Public routes (about/privacy/terms/contact/blog/blog detail)
+- Day 9: Nav wiring, full build verification, manual QA pass
 
 ---
 
@@ -574,94 +268,42 @@ npm install -D @playwright/test
 
 Phase 5 is complete when:
 
-- ✅ Payment integration works end-to-end (test mode)
-- ✅ Error tracking configured and working
-- ✅ Security audit passed
-- ✅ Performance benchmarks met
-- ✅ Invoice generation functional
-- ✅ All critical bugs fixed
-- ✅ Production deployment successful
-- ✅ Payment flow tested with real users
-- ✅ Documentation updated
-- ✅ Build passes without errors
-
----
-
-## Migration from Phase 4
-
-**No Breaking Changes:**
-
-- Current manual booking flow remains functional
-- Payment integration is additive
-- Existing bookings unaffected
-- Database schema already supports payment (optional field)
-
-**Migration Steps:**
-
-1. Add Razorpay credentials to environment
-2. Deploy payment endpoints
-3. Update booking page with payment option
-4. Test thoroughly in test mode
-5. Enable payment gateway in production
-6. Monitor first 50 transactions closely
+- ✅ `Page`, `BlogPost`, `ContactSubmission` models exist and are seeded
+- ✅ Admin can fully manage static pages and blog posts from the dashboard
+- ✅ Contact form submissions are captured and (when configured) emailed to the admin
+- ✅ All 5 Footer-linked public routes exist and render admin-authored content
+- ✅ `npm run build` passes cleanly
+- ✅ Existing Vitest suite (`npm run test`) remains green
 
 ---
 
 ## Dependencies
 
-**External Services (Required):**
+**External Services:**
 
-- ✅ Razorpay account (test + production credentials)
-- Email service (already configured in Phase 4)
-- Cloudinary (already configured)
-- Sentry account (optional but recommended)
+- Cloudinary (already configured, reused for featured images)
+- Resend (already configured, reused for contact notifications)
 
-**Technical:**
+**New npm packages:**
 
-- No database migrations required
-- Compatible with current Next.js/Prisma versions
-- Requires Node.js 18+ for crypto APIs
+- `react-markdown`, `remark-gfm`
 
----
+**Technical Prerequisites:**
 
-## Risk Mitigation
-
-**Payment Integration Risks:**
-
-1. **Signature Verification Failure**
-   - Mitigation: Extensive testing, logging
-   - Fallback: Manual verification process
-
-2. **Payment Gateway Downtime**
-   - Mitigation: Show clear error messages
-   - Fallback: Allow manual booking requests
-
-3. **Webhook Delivery Failures**
-   - Mitigation: Implement retry logic
-   - Fallback: Polling mechanism
-
-4. **Refund Processing**
-   - Mitigation: Clear refund policy
-   - Fallback: Manual refund via Razorpay dashboard
+- None beyond the schema migration — additive change, no impact on existing models
 
 ---
 
-## Post-Phase 5 Roadmap
+## Out of Scope (Deferred)
 
-**Future Enhancements:**
-
-- Multi-currency support
-- Subscription plans for venue owners
-- Mobile apps (React Native)
-- WhatsApp integration
-- AI-powered recommendations
-- Dynamic pricing
-- Multi-language support
-- Venue comparison tool
+- Rich WYSIWYG editor (TipTap or similar)
+- Blog categories/tags, comments
+- Contact-form spam protection (captcha/rate-limiting) beyond basic validation
+- SEO sitemap/RSS feed generation
 
 ---
 
-**Last Updated**: September 2, 2026  
+**Last Updated**: September 25, 2026  
 **Status**: Planning Phase  
-**Prerequisites**: Phase 4 completion, Razorpay account  
-**Target Launch**: After 2-3 weeks of development and testing
+**Prerequisites**: Phase 4 completion (done)  
+**Payment Integration**: Deferred to Phase 6 (see [PHASE_6_ROADMAP.md](PHASE_6_ROADMAP.md))

@@ -6,6 +6,7 @@ import { MapPin, Calendar, Clock, Star } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import ReviewModal from "@/components/ReviewModal";
+import CustomerBookingActions from "@/components/CustomerBookingActions";
 
 const statusConfig: Record<string, { label: string; color: string }> = {
     PENDING: { label: "Pending", color: "bg-yellow-500/20 text-yellow-300" },
@@ -23,6 +24,7 @@ export default async function CustomerBookingsPage() {
             where: { customerId: session.user.id! },
             include: {
                 venue: { select: { name: true, images: true, city: true, state: true, slug: true } },
+                modificationRequests: { where: { status: "PENDING" }, select: { id: true } },
             },
             orderBy: { createdAt: "desc" },
         }),
@@ -54,6 +56,7 @@ export default async function CustomerBookingsPage() {
                         {bookings.map((booking) => {
                             const st = statusConfig[booking.status] ?? statusConfig.PENDING;
                             const alreadyReviewed = reviewedVenueIds.has(booking.venueId);
+                            const showActions = booking.status !== "CANCELLED";
                             return (
                                 <div key={booking.id} className="glass-card rounded-2xl p-5">
                                     <div className="flex gap-4">
@@ -92,6 +95,19 @@ export default async function CustomerBookingsPage() {
                                             ) : (
                                                 <ReviewModal venueId={booking.venueId} venueName={booking.venue.name} />
                                             )}
+                                        </div>
+                                    )}
+
+                                    {showActions && (
+                                        <div className="mt-4 pt-4 border-t border-white/10 flex justify-end">
+                                            <CustomerBookingActions
+                                                bookingId={booking.id}
+                                                status={booking.status}
+                                                eventDate={booking.eventDate.toISOString()}
+                                                hours={booking.hours}
+                                                guestCount={booking.guestCount}
+                                                hasPendingModificationRequest={booking.modificationRequests.length > 0}
+                                            />
                                         </div>
                                     )}
                                 </div>

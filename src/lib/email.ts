@@ -167,6 +167,72 @@ export async function sendBookingStatusUpdateToCustomer(params: {
     await resend.emails.send({ from: FROM, to: params.customerEmail, subject: meta.subject, html });
 }
 
+export async function sendBookingCancelledByCustomerToOwner(params: {
+    ownerEmail: string;
+    ownerName: string;
+    customerName: string;
+    venueName: string;
+    eventDate: Date | string;
+}) {
+    if (!process.env.RESEND_API_KEY) return;
+    const html = baseLayout("Booking Cancelled by Customer", `
+      <p style="font-size:16px;margin-top:0;">Hi ${params.ownerName},</p>
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;line-height:1.6;"><strong style="color:#fff;">${params.customerName}</strong> has cancelled their booking for <strong style="color:#fff;">${params.venueName}</strong>. The date is now open for new bookings.</p>
+      <div class="divider"></div>
+      <div class="row"><span class="label">Event date</span><span class="value">${formatDateEmail(params.eventDate)}</span></div>
+      <div class="row"><span class="label">Status</span><span class="value"><span class="badge badge-cancelled">CANCELLED</span></span></div>
+      <a href="${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/dashboard/owner/bookings" class="btn">View Bookings →</a>
+    `);
+    await resend.emails.send({ from: FROM, to: params.ownerEmail, subject: `Booking Cancelled · ${params.venueName}`, html });
+}
+
+export async function sendModificationRequestToOwner(params: {
+    ownerEmail: string;
+    ownerName: string;
+    customerName: string;
+    venueName: string;
+    currentEventDate: Date | string;
+    requestedEventDate: Date | string;
+    requestedHours: number;
+    requestedGuestCount: number;
+    reason?: string;
+}) {
+    if (!process.env.RESEND_API_KEY) return;
+    const html = baseLayout("Booking Change Requested", `
+      <p style="font-size:16px;margin-top:0;">Hi ${params.ownerName},</p>
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;line-height:1.6;"><strong style="color:#fff;">${params.customerName}</strong> has requested a change to their booking for <strong style="color:#fff;">${params.venueName}</strong>. Please review and approve or reject it.</p>
+      <div class="divider"></div>
+      <div class="row"><span class="label">Current date</span><span class="value">${formatDateEmail(params.currentEventDate)}</span></div>
+      <div class="row"><span class="label">Requested date</span><span class="value">${formatDateEmail(params.requestedEventDate)}</span></div>
+      <div class="row"><span class="label">Requested duration</span><span class="value">${params.requestedHours} hour${params.requestedHours !== 1 ? "s" : ""}</span></div>
+      <div class="row"><span class="label">Requested guests</span><span class="value">${params.requestedGuestCount}</span></div>
+      ${params.reason ? `<p style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:6px;">Reason</p><div class="message-box">${params.reason}</div>` : ""}
+      <a href="${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/dashboard/owner/bookings" class="btn">Review Request →</a>
+    `);
+    await resend.emails.send({ from: FROM, to: params.ownerEmail, subject: `Booking Change Requested · ${params.venueName}`, html });
+}
+
+export async function sendModificationDecisionToCustomer(params: {
+    customerEmail: string;
+    customerName: string;
+    venueName: string;
+    approved: boolean;
+    requestedEventDate: Date | string;
+    reviewNote?: string;
+}) {
+    if (!process.env.RESEND_API_KEY) return;
+    const html = baseLayout(params.approved ? "Booking Change Approved" : "Booking Change Rejected", `
+      <p style="font-size:16px;margin-top:0;">Hi ${params.customerName},</p>
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;line-height:1.6;">
+        Your request to change your booking for <strong style="color:#fff;">${params.venueName}</strong> to ${formatDateEmail(params.requestedEventDate)} was
+        <strong style="color:#fff;">${params.approved ? "approved" : "not approved"}</strong>.
+      </p>
+      ${params.reviewNote ? `<p style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:6px;">Note from venue</p><div class="message-box">${params.reviewNote}</div>` : ""}
+      <a href="${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/dashboard/customer/bookings" class="btn">View My Bookings →</a>
+    `);
+    await resend.emails.send({ from: FROM, to: params.customerEmail, subject: `Booking Change ${params.approved ? "Approved" : "Rejected"} · ${params.venueName}`, html });
+}
+
 // ─── Enquiry emails ────────────────────────────────────────────────────────
 
 export async function sendEnquiryNotificationToOwner(params: {

@@ -20,7 +20,8 @@ Welcome to the comprehensive documentation for **BookNParty** - a modern venue b
 
 - **[Phase 3 Status](PHASE_3_STATUS.md)** - Phase 3 completion and verification status
 - **[Phase 4 Roadmap](PHASE_4_ROADMAP.md)** - UX and communication enhancements
-- **[Phase 5 Roadmap](PHASE_5_ROADMAP.md)** - Payment integration and production scaling
+- **[Phase 5 Roadmap](PHASE_5_ROADMAP.md)** - Content management (static pages & blog)
+- **[Phase 6 Roadmap](PHASE_6_ROADMAP.md)** - Payment integration and production scaling
 - **[Verification Checklist](VERIFICATION_CHECKLIST.md)** - Testing procedures and flows
 
 ## 🚀 Quick Start
@@ -63,28 +64,33 @@ All major AI agents (GitHub Copilot, Cursor, Claude, Windsurf, etc.) can read th
 | **API_REFERENCE**          | Implementing/consuming API endpoints                     |
 | **DEVELOPMENT_GUIDE**      | Setting up local environment, troubleshooting            |
 | **PHASE_3_STATUS**         | Checking what's implemented and what's pending           |
-| **PHASE_4_ROADMAP**        | Tracking delivered and pending Phase 4 work              |
-| **PHASE_5_ROADMAP**        | Payment integration and production scaling plan          |
+| **PHASE_4_ROADMAP**        | Phase 4 completion summary (all items delivered)         |
+| **PHASE_5_ROADMAP**        | Content management (static pages & blog) plan            |
+| **PHASE_6_ROADMAP**        | Payment integration and production scaling plan          |
 | **VERIFICATION_CHECKLIST** | Testing features or validating implementation            |
 
 ## Current Status
 
-**Current Phase**: Phase 4 (In Progress)
+**Current Phase**: Phase 4 (Complete) — Phase 5 (Content Management) and Phase 6 (Payments) not started
 
-**Latest development status (September 2, 2026):**
+**Latest development status (September 25, 2026):**
 
-- ✅ Email delivery utilities and notification hooks are implemented for bookings, enquiries, venue approval, and welcome messages.
+- ✅ Email delivery utilities and notification hooks are implemented for bookings, enquiries, venue approval, cancellations, modification requests, and welcome messages.
 - ✅ Profile management is live for all three roles, including password change and account info updates.
 - ✅ Admin settings screens and moderation toggles are in place.
-- ⏳ Availability calendar and conflict detection remain open.
-- ⏳ Payment integration is still targeted for Phase 5.
-- ⏳ Password recovery, invoice generation, and final production hardening are pending.
+- ✅ Availability calendar, block-dates, and booking conflict detection are implemented.
+- ✅ Password recovery with expiring reset tokens is implemented.
+- ✅ Invoice generation, customer booking cancellation, and booking modification (reschedule) workflow with owner approval are implemented.
+- ✅ Admin export and bulk actions for bookings and enquiries are implemented.
+- ✅ Vitest testing baseline and a Sentry monitoring scaffold are in place.
+- ⏳ Admin-managed content (static pages, blog, contact form) is targeted for Phase 5.
+- ⏳ Payment integration is targeted for Phase 6.
 
 **Completed:**
 
 - ✅ Authentication & role-based access
 - ✅ Venue management (CRUD, approval workflow)
-- ✅ Booking system (create, manage, confirm/cancel)
+- ✅ Booking system (create, manage, confirm/cancel/reschedule)
 - ✅ Enquiry system (customer-owner communication)
 - ✅ Review & rating system
 - ✅ Advanced search & filtering
@@ -92,18 +98,27 @@ All major AI agents (GitHub Copilot, Cursor, Claude, Windsurf, etc.) can read th
 - ✅ Email notifications infrastructure
 - ✅ Account profile management
 - ✅ Admin platform settings UI
+- ✅ Venue availability calendar and date blocking
+- ✅ Password reset workflow
+- ✅ Invoice generation and booking modification requests
+- ✅ Admin export and bulk actions
+- ✅ Testing baseline (Vitest) and monitoring scaffold (Sentry)
 
-**Still pending:**
+**Still pending (Phase 5 - Content Management):**
 
-- 🔄 Venue availability calendar and date blocking
+- 🔄 Admin-managed static pages (About, Contact, Privacy, Terms)
+- 🔄 Blog CRUD and public blog pages
+- 🔄 Contact form with admin email notification
+
+**Still pending (Phase 6 - Payments & Scale):**
+
 - 🔄 Razorpay payment flow
-- 🔄 Password reset workflow
-- 🔄 Invoice generation and booking modifications
-- 🔄 Security hardening, monitoring, and QA automation
+- 🔄 Security hardening (rate limiting, CSP, brute-force protection)
+- 🔄 Expanded automated test coverage (integration/E2E) and performance optimization
 
 **Verification note:**
 
-- The project has active code for Phase 4 features, but the final build verification should be rerun after clearing an existing stale `next build` process in the environment.
+- Full production build (`npm run build`) passes cleanly end-to-end as of the last verification pass.
 
 ## 🤝 Contributing
 
@@ -111,7 +126,7 @@ Before making changes:
 
 1. Read the relevant documentation
 2. Understand the architecture and patterns
-3. Check Phase 3/4/5 status to avoid duplicate work
+3. Check Phase 3/4/5/6 status to avoid duplicate work
 4. Follow the conventions in `.instructions.md`
 5. Test with multiple user roles
 6. Run `npm run build` to verify
@@ -125,5 +140,5 @@ Before making changes:
 
 ---
 
-**Last Updated**: September 2, 2026  
-**Version**: Phase 4 Execution (v1.0)
+**Last Updated**: September 25, 2026  
+**Version**: Phase 4 Complete (v1.0)
